@@ -2,11 +2,12 @@
 #define JSL_MACROS
 
 #include <time.h>
+#include <stdio.h>
 
 #define TRUE 1
 #define FALSE 0
 #define ODD(n) ((n) & 1)
-#define EVEN(n) (!odd(n))
+#define EVEN(n) (n % 2 == 0)
 #define ABS(x) ((x) < 0 ? -(x) : (x))
 #define NEG(x) (-(x))
 #define SQ(x) ((x)*(x))
@@ -16,11 +17,11 @@
 #define DEG2RAD(x) ((x)*PI/180)
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
 #define MAX(x, y) ((x) > (y) ? (x) : (y))
-#define CLAMP(x, lo, hi) (max((lo), min((hi), (x))))
-#define DELTA(x, y) (abs((x)-(y)))
-#define SWAP(a, b) do { a ^= b; b ^= a; a ^= b; } while ( 0 )
-#define ORDERING(a, b) ((a) > (b) - (a) < (b))
-#define SIGN(x) (ordering((x), 0))
+#define CLAMP(x, lo, hi) (MAX((lo), MIN((hi), (x))))
+#define DELTA(x, y) (ABS((x)-(y)))
+#define SWAP(a, b, type) do { type c = a; type d = b; b = c; a = d; } while ( 0 )
+#define COMPARE(a, b) (((a) > (b)) - ((a) < (b)))
+#define SIGN(x) (COMPARE((x), 0))
 #define IN_RANGE_INCL(x, lo, hi) ((x) >= (lo) && (x) <= (hi))
 #define IN_RANGE_EXCL(x, lo, hi) ((x) > (lo) && (x) < (hi))
 #define IN_RANGE_UPPER_INCL(x, lo, hi) ((x) > (lo) && (x) <= (hi))
@@ -36,10 +37,10 @@
 
 #define IS_ARRAY(a) ((void *)&a == (void *)a)
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
-#define SET(d, n, v)  do{ size_t i_, n_; \
+#define SET_UP_TO(d, n, v)  do{ size_t i_, n_; \
                       for ( n_ = (n), i_ = 0; n_ > 0; --n_, ++i_) \
                       (d)[i_] = (v); } while(0)
-#define ZERO(d, n)    SET(d, n, 0)
+#define ZERO_UP_TO(d, n)    SET_UP_TO(d, n, 0)
 #define COLUMNS(S,E)  ( (E) - (S) + 1 )
 #define RANGE(i,y,x)  for(i=(y);(((x)>=(y))?(i<(x)):(i>x));\
                       (((x)>=(y))?((i)++):((i)--)))
@@ -52,7 +53,7 @@
                       for(i = (A)+_count; _keep; _keep = !_keep)
 
 #define LOOP for(;;)
-#define MAIN main(int argc, char** argv)
+#define MAIN int main(int argc, char** argv)
 
 #define NOW time(NULL)
 #define EFFECTIVE_USER_ID geteuid()
@@ -60,14 +61,16 @@
 
 #define DIE exit(0)
 
-#define ASSERT(cond)           if(!(cond)){\
-    printf(__FILE__ "@%d: `" #n "` - Failed | Compilation: " __DATE__ " " __TIME__ "\n", __LINE__);\
+#define ASSERT(cond) if(!(cond)){\
+    printf(__FILE__ "@%d: `" #cond "` - Failed | Compilation: " __DATE__ " " __TIME__ "\n", __LINE__);\
     return(-1);}
 
 #define REQUIRE(cond) ASSERT(cond)
 #define ENSURE(cond) ASSERT(cond)
 #define LOG(x, fmt, ...)    if(x){printf("%s@%d: " fmt "\n",\
                             __FILE__, __LINE__,__VA_ARGS__);}
+
+#define TO_STRING(str)  #str
 
 #define DEFER2(head, tail, i)   for(int i=(head,0);!i;tail,i++)
 #define DEFER(head, tail)       DEFER2(head, tail, __deferVar__##__COUNTER__)
