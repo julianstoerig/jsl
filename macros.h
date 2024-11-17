@@ -35,8 +35,8 @@
 #define GETBIT(x,p) (((x)>>(p))&1)
 #define TOGGLEBIT(x,p) ((x)^(1<<(p)))
 
-#define IS_ARRAY(a) ((void *)&a == (void *)a)
-#define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
+#define IS_STACK_ARRAY(a) ((void *)&a == (void *)a)
+#define STACK_ARRAY_LEN(a) (sizeof(a) / sizeof((a)[0]))
 #define SET_UP_TO(d, n, v)  do{ size_t i_, n_; \
                       for ( n_ = (n), i_ = 0; n_ > 0; --n_, ++i_) \
                       (d)[i_] = (v); } while(0)
@@ -69,10 +69,6 @@
 #define ENSURE(cond) ASSERT(cond)
 #define LOG(x, fmt, ...)    if(x){printf("%s@%d: " fmt "\n",\
                             __FILE__, __LINE__,__VA_ARGS__);}
-
 #define TO_STRING(str)  #str
-
-#define DEFER2(head, tail, i)   for(int i=(head,0);!i;tail,i++)
-#define DEFER(head, tail)       DEFER2(head, tail, __deferVar__##__COUNTER__)
 
 #endif
