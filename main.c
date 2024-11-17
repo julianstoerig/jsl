@@ -1,5 +1,4 @@
-#include "macros.h"
-// #include "macros2.h"
+#include "lib.h"
 
 int main (int argc, char** argv) {
     ASSERT(TRUE);
@@ -130,6 +129,5 @@ int main (int argc, char** argv) {
 
     ASSERT(TO_STRING(hello) == "hello");
 
-    printf("[SUCCESS] defer\n");
     printf("[SUCCESS] all tests passed fine.\n\n");
 }
