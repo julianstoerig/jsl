@@ -1,9 +1,8 @@
-#include "lib.h"
+#include "macros.h"
+#include "allocators.h"
+#include <stdbool.h>
 
 int main (int argc, char** argv) {
-    ASSERT(TRUE);
-    ASSERT(!FALSE);
-
     ASSERT(ODD(1));
     ASSERT(ODD(-1));
     ASSERT(!ODD(2));
@@ -13,28 +12,28 @@ int main (int argc, char** argv) {
     ASSERT(EVEN(2));
     ASSERT(EVEN(-2));
 
-    printf("[SUCCESS] bool\n");
+    puts("[SUCCESS] bool\n");
 
     ASSERT(NEG(5)==-5);
     ASSERT(NEG(-3)==3);
 
-    printf("[SUCCESS] negation\n");
+    puts("[SUCCESS] negation\n");
 
     ASSERT(SQ(2)==4);
     ASSERT(SQ(0.5)-0.25 < 0.1);
 
-    printf("[SUCCESS] square function\n");
+    puts("[SUCCESS] square function\n");
 
     ASSERT(PI - 3.1415 < 0.1);
     ASSERT(E - 2.78 < 0.1);    
 
-    printf("[SUCCESS] mathematical constants\n");
+    puts("[SUCCESS] mathematical constants\n");
 
     ASSERT(RAD2DEG(PI)-180 < 0.1);
     ASSERT(DEG2RAD(360)-2*PI < 0.1);
     ASSERT(DEG2RAD(RAD2DEG(PI))-PI<0.1);
 
-    printf("[SUCCESS] angle conversion funcions\n");
+    puts("[SUCCESS] angle conversion funcions\n");
 
     ASSERT(SIGN(5)==1);
     ASSERT(SIGN(-5)==-1);
@@ -48,7 +47,7 @@ int main (int argc, char** argv) {
     ASSERT(COMPARE(3,3)==0);    
     ASSERT(COMPARE(5,3)==1);    
 
-    printf("[SUCCESS] comparison functions\n");
+    puts("[SUCCESS] comparison functions\n");
 
     ASSERT(MIN(5,9)==5);
     ASSERT(MIN(5,5)==5);
@@ -62,7 +61,7 @@ int main (int argc, char** argv) {
     ASSERT(DELTA(6, 5) == 1);
     ASSERT(DELTA(5, 6) == 1);
 
-    printf("[SUCCESS] min max and clamping functions\n");
+    puts("[SUCCESS] min max and clamping functions\n");
 
     {
         int a = 1;
@@ -92,42 +91,57 @@ int main (int argc, char** argv) {
     ASSERT(!IN_RANGE_EXCL(7, 4, 7));
     ASSERT(!IN_RANGE_EXCL(3, 4, 7));
 
-    printf("[SUCCESS] ranges\n");
+    puts("[SUCCESS] ranges\n");
 
-    ASSERT(IMPLIES(TRUE, TRUE));
-    ASSERT(!IMPLIES(TRUE, FALSE));
-    ASSERT(IMPLIES(FALSE, TRUE));
-    ASSERT(IMPLIES(FALSE, FALSE));
+    ASSERT(IMPLIES(true, true));
+    ASSERT(!IMPLIES(true, false));
+    ASSERT(IMPLIES(false, true));
+    ASSERT(IMPLIES(false, false));
 
-    ASSERT(IFF(TRUE, TRUE));
-    ASSERT(!IFF(TRUE, FALSE));
-    ASSERT(!IFF(FALSE, TRUE));
-    ASSERT(IFF(FALSE, FALSE));
+    ASSERT(IFF(true, true));
+    ASSERT(!IFF(true, false));
+    ASSERT(!IFF(false, true));
+    ASSERT(IFF(false, false));
 
-    printf("[SUCCESS] boolean algebra\n");
+    puts("[SUCCESS] boolean algebra\n");
 
     int arr[] = {1, 1, 1, 1, 1};
 
     int arr_len = (sizeof(arr) / sizeof(arr[0]));
     ASSERT(arr_len == 5);
-    // ASSERT(IS_ARRAY(arr)==TRUE);
+    // ASSERT(IS_ARRAY(arr)==true);
 
     int array_size = 5;//ARRAY_SIZE(arr);
     // ASSERT(array_size==arr_len);
 
-    printf("[SUCCESS] array size\n");
+    puts("[SUCCESS] array size\n");
     SET_UP_TO(arr, array_size, 1);
     FOREACH(int *i, arr)
         ASSERT(*i == 1);
-    printf("[SUCCESS] array filling\n");
+    puts("[SUCCESS] array filling\n");
 
     ASSERT(arr[0]==1);
     ZERO_UP_TO(arr, array_size);
     FOREACH(int *i, arr)
         ASSERT(*i == 0);
-    printf("[SUCCESS] array zeroing\n");
+    puts("[SUCCESS] array zeroing\n");
 
     ASSERT(TO_STRING(hello) == "hello");
 
-    printf("[SUCCESS] all tests passed fine.\n\n");
+    int *checkedMallocArray = checkedMalloc(sizeof(int) * 100);
+    puts("[SUCCESSS] checkedMalloc works\n");
+    for (int i = 0; i < sizeof(arr) / sizeof(arr[0]); i++) {
+        arr[i] = 2*i;
+    }    
+    checkedFree(checkedMallocArray);
+
+    puts("[SUCCESSS] checkedFree works\n");
+
+    int *p;
+    NEW(p, int);
+    DELETE(p);
+
+    puts("[SUCCESS] NEW and DELETE work.\n");
+
+    puts("[SUCCESS] all tests passed fine.\n\n");
 }
