@@ -3,9 +3,8 @@
 
 #include <time.h>
 #include <stdio.h>
+#include <malloc.h>
 
-#define TRUE 1
-#define FALSE 0
 #define ODD(n) ((n) & 1)
 #define EVEN(n) (n % 2 == 0)
 #define ABS(x) ((x) < 0 ? -(x) : (x))
@@ -20,8 +19,15 @@
 #define CLAMP(x, lo, hi) (MAX((lo), MIN((hi), (x))))
 #define DELTA(x, y) (ABS((x)-(y)))
 #define SWAP(a, b, type) do { type c = a; type d = b; b = c; a = d; } while ( 0 )
-#define COMPARE(a, b) (((a) > (b)) - ((a) < (b)))
-#define SIGN(x) (COMPARE((x), 0))
+
+typedef enum {
+    ORD_LESS = -1,
+    ORD_EQUAL = 0,
+    ORD_GREATER = 1,
+} ORDERING;
+
+#define COMPARE(a, b) ((ORDERING)(((a) > (b)) - ((a) < (b))))
+#define SIGN(x) (((x) > 0) - ((x) < 0))
 #define IN_RANGE_INCL(x, lo, hi) ((x) >= (lo) && (x) <= (hi))
 #define IN_RANGE_EXCL(x, lo, hi) ((x) > (lo) && (x) < (hi))
 #define IN_RANGE_UPPER_INCL(x, lo, hi) ((x) > (lo) && (x) <= (hi))
