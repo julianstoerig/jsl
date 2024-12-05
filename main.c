@@ -128,12 +128,12 @@ int main (int argc, char** argv) {
 
     ASSERT(TO_STRING(hello) == "hello");
 
-    int *checkedMallocArray = checkedMalloc(sizeof(int) * 100);
+    int *checkedMallocArray = CHECKED_MALLOC(sizeof(int) * 100);
     puts("[SUCCESSS] checkedMalloc works\n");
     for (int i = 0; i < sizeof(arr) / sizeof(arr[0]); i++) {
         arr[i] = 2*i;
     }    
-    checkedFree(checkedMallocArray);
+    CHECKED_FREE(checkedMallocArray);
 
     puts("[SUCCESSS] checkedFree works\n");
 
