@@ -5,6 +5,10 @@
 #include <stdio.h>
 #include <malloc.h>
 
+#define global static
+#define internal static
+#define persistent static
+
 #define ODD(n) ((n) & 1)
 #define EVEN(n) (n % 2 == 0)
 #define ABS(x) ((x) < 0 ? -(x) : (x))
