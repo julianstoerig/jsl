@@ -14,12 +14,12 @@
         object = NULL;\
     } while (0)
 
-void *CHECKED_MALLOC(int bytes) {
+void *malloc_checked(int bytes) {
     void *ptr = malloc(bytes);
     assert(ptr);
 }
 
-#define CHECKED_FREE(object) \
+#define free_checked(object) \
     do {\
         assert(object && "double free"); \
         free(object); \
