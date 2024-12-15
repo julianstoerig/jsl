@@ -24,6 +24,10 @@
 #define DELTA(x, y) (ABS((x)-(y)))
 #define SWAP(a, b, type) do { type c = a; type d = b; b = c; a = d; } while ( 0 )
 
+#define BYTE(a,b,c,d,e,f,g,h) ((a) << 7 + (b) << 6 + (c) << 5 + (d) << 4 + (e) << 3 + (f) << 2 + (g) << 1 + (h) << 0)
+
+#define NYBBLE(e,f,g,h) ((e) << 3 + (f) << 2 + (g) << 1 + (h) << 0)
+
 typedef enum {
     ORD_LESS = -1,
     ORD_EQUAL = 0,
@@ -69,11 +73,16 @@ typedef enum {
 #define EFFECTIVE_USER_ID geteuid()
 #define USER_ID getuid()
 
-#define DIE exit(0)
+#define ASSERT_EXIT(cond) if(!(cond)){\
+    printf(__FILE__ "@%d: `" #cond "` - Failed | Compilation: " __DATE__ " " __TIME__ "\n", __LINE__);\
+    exit(1);}
 
-#define ASSERT(cond) if(!(cond)){\
+#define ASSERT_RETURN(cond) if(!(cond)){\
     printf(__FILE__ "@%d: `" #cond "` - Failed | Compilation: " __DATE__ " " __TIME__ "\n", __LINE__);\
     return(-1);}
+
+#define ERR_EXIT(...) do { fprintf(stderr, __VA_ARGS__); exit(1); } while(0)
+#define ERR_RETURN(ERRV, ...) do { fprintf(stderr, __VA_ARGS__); return ERRV; } while(0)
 
 #define REQUIRE(cond) ASSERT(cond)
 #define ENSURE(cond) ASSERT(cond)
