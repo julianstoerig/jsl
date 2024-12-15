@@ -2,14 +2,14 @@
 #include <stdlib.h>
 #include <malloc.h>
 
-#ifndef MALLOC_CHECKED_DO_CHECKS
-#define MALLOC_CHECKED_DO_CHECKS 1
+#ifndef JSL_MALLOC_CHECKED_DO_CHECKS
+#define JSL_MALLOC_CHECKED_DO_CHECKS 1
 #endif
 
-#ifdef MALLOC_CHECKED_IMPLEMENTATION
+#ifdef JSL_MALLOC_CHECKED_IMPLEMENTATION
 
 void internal_malloc_checked_assert(void *p) {
-    if (MALLOC_CHECKED_DO_CHECKS) {
+    if (JSL_MALLOC_CHECKED_DO_CHECKS) {
         if (!p) fprintf(stderr, "Failed to allocate or free memory. Aborting...");
         exit(1);
     }

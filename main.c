@@ -1,6 +1,12 @@
 #include "macros.h"
-#include "allocators.h"
+#define JSL_MALLOC_CHECKED_IMPLEMENTATION
+#include "malloc_checked.h"
 #include <stdbool.h>
+#include "meta_macros.h"
+#include "mathy_macros.h"
+#include "assert.h"
+#include "bit_fiddling.h"
+#include "typedefs.h"
 
 int main (int argc, char** argv) {
     ASSERT(ODD(1));
@@ -19,8 +25,8 @@ int main (int argc, char** argv) {
 
     puts("[SUCCESS] negation\n");
 
-    ASSERT(SQ(2)==4);
-    ASSERT(SQ(0.5)-0.25 < 0.1);
+    ASSERT(SQR(2)==4);
+    ASSERT(SQR(0.5)-0.25 < 0.1);
 
     puts("[SUCCESS] square function\n");
 

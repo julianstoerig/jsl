@@ -5,55 +5,21 @@
 #include <stdio.h>
 #include <malloc.h>
 
+#include "meta_macros.h"
+#include "mathy_macros.h"
+#include "assert.h"
+#include "bit_fiddling.h"
+#include "typedefs.h"
+
 #define global static
 #define internal static
 #define persistent static
 
-#define ODD(n) ((n) & 1)
-#define EVEN(n) (n % 2 == 0)
-#define ABS(x) ((x) < 0 ? -(x) : (x))
-#define NEG(x) (-(x))
-#define SQ(x) ((x)*(x))
-#define PI 3.141592653589793238462643
-#define E  2.718281828459045235360287
-#define RAD2DEG(x) ((x)*180/PI)
-#define DEG2RAD(x) ((x)*PI/180)
-#define MIN(x, y) ((x) < (y) ? (x) : (y))
-#define MAX(x, y) ((x) > (y) ? (x) : (y))
-#define CLAMP(x, lo, hi) (MAX((lo), MIN((hi), (x))))
-#define DELTA(x, y) (ABS((x)-(y)))
-#define SWAP(a, b, type) do { type c = a; type d = b; b = c; a = d; } while ( 0 )
-
-#define BYTE(a,b,c,d,e,f,g,h) ((a) << 7 + (b) << 6 + (c) << 5 + (d) << 4 + (e) << 3 + (f) << 2 + (g) << 1 + (h) << 0)
-
-#define NYBBLE(e,f,g,h) ((e) << 3 + (f) << 2 + (g) << 1 + (h) << 0)
-
-typedef enum {
-    ORD_LESS = -1,
-    ORD_EQUAL = 0,
-    ORD_GREATER = 1,
-} ORDERING;
-
-#define COMPARE(a, b) ((ORDERING)(((a) > (b)) - ((a) < (b))))
-#define SIGN(x) (((x) > 0) - ((x) < 0))
-#define IN_RANGE_INCL(x, lo, hi) ((x) >= (lo) && (x) <= (hi))
-#define IN_RANGE_EXCL(x, lo, hi) ((x) > (lo) && (x) < (hi))
-#define IN_RANGE_UPPER_INCL(x, lo, hi) ((x) > (lo) && (x) <= (hi))
-#define IN_RANGE_LOWER_INCL(x, lo, hi) ((x) >= (lo) && (x) < (hi))
-#define IMPLIES(a, b) (!(a) || (b))
-#define IFF(a, b) ((a) == (b))
-
-#define BIT(x) (1<<(x))
-#define SETBIT(x,p) ((x)|(1<<(p)))
-#define CLEARBIT(x,p) ((x)&(~(1<<(p))))
-#define GETBIT(x,p) (((x)>>(p))&1)
-#define TOGGLEBIT(x,p) ((x)^(1<<(p)))
-
 #define IS_STACK_ARRAY(a) ((void *)&a == (void *)a)
 #define STACK_ARRAY_LEN(a) (sizeof(a) / sizeof((a)[0]))
-#define SET_UP_TO(d, n, v)  do{ size_t i_, n_; \
+#define SET_UP_TO(d, n, v)  STMNT( size_t i_, n_; \
                       for ( n_ = (n), i_ = 0; n_ > 0; --n_, ++i_) \
-                      (d)[i_] = (v); } while(0)
+                      (d)[i_] = (v); )
 #define ZERO_UP_TO(d, n)    SET_UP_TO(d, n, 0)
 #define COLUMNS(S,E)  ( (E) - (S) + 1 )
 #define RANGE(i,y,x)  for(i=(y);(((x)>=(y))?(i<(x)):(i>x));\
@@ -72,22 +38,5 @@ typedef enum {
 #define NOW time(NULL)
 #define EFFECTIVE_USER_ID geteuid()
 #define USER_ID getuid()
-
-#define ASSERT_EXIT(cond) if(!(cond)){\
-    printf(__FILE__ "@%d: `" #cond "` - Failed | Compilation: " __DATE__ " " __TIME__ "\n", __LINE__);\
-    exit(1);}
-
-#define ASSERT_RETURN(cond) if(!(cond)){\
-    printf(__FILE__ "@%d: `" #cond "` - Failed | Compilation: " __DATE__ " " __TIME__ "\n", __LINE__);\
-    return(-1);}
-
-#define ERR_EXIT(...) do { fprintf(stderr, __VA_ARGS__); exit(1); } while(0)
-#define ERR_RETURN(ERRV, ...) do { fprintf(stderr, __VA_ARGS__); return ERRV; } while(0)
-
-#define REQUIRE(cond) ASSERT(cond)
-#define ENSURE(cond) ASSERT(cond)
-#define LOG(x, fmt, ...)    if(x){printf("%s@%d: " fmt "\n",\
-                            __FILE__, __LINE__,__VA_ARGS__);}
-#define TO_STRING(str)  #str
 
 #endif
