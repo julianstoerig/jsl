@@ -1,23 +1,24 @@
 #ifndef JSL_ARENA_H
 #define JSL_ARENA_H
 
-#include <string.h>
 #include "bit_fiddling.h"
 #include "assert.h"
 
-#define sizeof(x)    (ptrdiff_t)sizeof(x)
-#define countof(a)   (sizeof(a) / sizeof(*(a)))
-#define lengthof(s)  (countof(s) - 1)
+#define   sizeof(x)  (ptrdiff_t)sizeof(x)
+#define  countof(a)  (sizeof(a) / sizeof(*(a)))
+#define  cstrlen(s)  (countof(s) - 1)
 
 typedef struct {
     char* beg;
+    char* rst;
     char* end;
 } Arena;
 
 typedef enum {
-    ArenaFlags_None     = 0,
-    ArenaFlags_NoAbort  = BIT(0),
-    ArenaFlags_NoZero   = BIT(1),
+    ArenaFlags_None           = 0,
+    ArenaFlags_NoAbort        = BIT(0),
+    ArenaFlags_NoZero         = BIT(1),
+    ArenaFlags_NoResizeTODO   = BIT(2),
 } ArenaFlags;
 
 #define new(...)            newx(__VA_ARGS__,new4,new3,new2)(__VA_ARGS__)
@@ -26,7 +27,6 @@ typedef enum {
 #define new3(arenaPtr, type, count)           (type *)alloc(arenaPtr, sizeof(type), alignof(type), count, ArenaFlags_None)
 #define new4(arenaPtr, type, count, flags)    (type *)alloc(arenaPtr, sizeof(type), alignof(type), count, flags)
 
-#endif
 #ifdef JSL_ARENA_IMPLEMENTATION
 
 #ifndef JSL_ARENA_OOM_POLICY
@@ -37,6 +37,7 @@ Arena ArenaCreate(ptrdiff_t cap) {
     REQUIRE(cap > 0);
     Arena a = {};
     a.beg = malloc(cap);
+    a.rst = a.beg;
     a.end = a.beg ? a.beg + cap : nullptr;
     return a;
 }
@@ -63,4 +64,10 @@ void* alloc(Arena* a, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, ArenaFla
 
     ENSURE(a);
 }
+
+void reset(Arena* a) {
+    a->beg = a->rst;
+}
+
+#endif
 #endif
