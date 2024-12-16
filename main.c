@@ -126,7 +126,6 @@ int main () {
 
     puts("[SUCCESS] boolean algebra\n");
 
-    fflush(stdout);
     ASSERT(!strcmp(TO_STRING(hello), "hello"));
 
     int arr[5] = {0};
@@ -144,7 +143,6 @@ int main () {
     int* arena_int_as = new(&arena, int, count);
     for (ptrdiff_t i=0; i<count; ++i) {
         int stack_int_a = arena_int_as[i];
-        fflush(stdout);
         ASSERT(stack_int_a || true);
     }
 
@@ -152,19 +150,14 @@ int main () {
     Arena arenaCopy = arena;
     Arena arenaScratchCopy = arenaScratch;
     testScratchArena1(&arena, arenaScratch);
-    fflush(stdout);
     ASSERT(arena.beg != arenaCopy.beg);
-    fflush(stdout);
     ASSERT(arenaScratch.beg != arenaScratchCopy.beg);
 
     int *arena_int_bs = new(&arena, int, 99, ArenaFlags_NoAbort | ArenaFlags_NoZero);
-    fflush(stdout);
     ASSERT(arena_int_bs);
     arena_int_bs[75] = 42;
-    fflush(stdout);
     ASSERT(arena_int_bs[75] == 42);
     testScratchArena2(arena);
-    fflush(stdout);
     ASSERT(arena_int_bs[75] == 42);
 
     Arena arenaC = ArenaCreate(sizeof(int));
@@ -175,12 +168,15 @@ int main () {
     reset(&arenaC);
     arenaCPtrA = nullptr;
     int *arenaCPtrB = new(&arenaC, int);
-    *arenaCPtrB = 69;
+    ASSERT(arenaCPtrAVal != *arenaCPtrB);
+
+    arenaCPtrAVal = *arenaCPtrB;
+    resetAndZero(&arenaC);
+    arenaCPtrB = new(&arenaC, int, 6, ArenaFlags_NoZero);
     ASSERT(arenaCPtrAVal != *arenaCPtrB);
         
     puts("[SUCCESS] arena works\n");
 
     puts("[SUCCESS] all tests passed fine.\n\n");
 
-    fflush(stdout);
 }
