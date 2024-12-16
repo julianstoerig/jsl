@@ -57,7 +57,7 @@ void* ArenaAlloc(Arena* a, ptrdiff_t size, ptrdiff_t align, ptrdiff_t count, Are
 
     ptrdiff_t padding = (uintptr_t)a->beg & (align - 1);
     ptrdiff_t available = (uintptr_t)a->end - padding; 
-    if (available < 0 || count > available / size) {
+    if ((available < 0) || (count > (available / size))) {
         if (!(flags & ArenaFlags_NoAbort)) {
             JSL_ARENA_OOM_POLICY();
         } else {
