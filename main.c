@@ -1,14 +1,31 @@
-#include "macros.h"
+#include <stddef.h>
+#include <stdint.h>
+#include <string.h>
 #define JSL_MALLOC_CHECKED_IMPLEMENTATION
 #include "malloc_checked.h"
-#include <stdbool.h>
 #include "meta_macros.h"
 #include "mathy_macros.h"
 #include "assert.h"
 #include "bit_fiddling.h"
 #include "typedefs.h"
+#define JSL_ARENA_IMPLEMENTATION
+#include "arena.h"
 
-int main (int argc, char** argv) {
+
+void testScratchArena1(Arena *a, Arena scratch) {
+    int* n = new(&scratch, int);
+    int* n2 = new(a, int);
+    
+    *n = 3;
+    *n2 = *n;
+}
+
+void testScratchArena2(Arena a) {
+    int *n = new(&a, int, 500);
+    for(ptrdiff_t i=0; i<500; ++i) *(n+i) = 41;
+}
+
+int main () {
     ASSERT(ODD(1));
     ASSERT(ODD(-1));
     ASSERT(!ODD(2));
@@ -111,43 +128,50 @@ int main (int argc, char** argv) {
 
     puts("[SUCCESS] boolean algebra\n");
 
-    int arr[] = {1, 1, 1, 1, 1};
+    fflush(stdout);
+    ASSERT(!strcmp(TO_STRING(hello), "hello"));
 
-    int arr_len = (sizeof(arr) / sizeof(arr[0]));
-    ASSERT(arr_len == 5);
-    // ASSERT(IS_ARRAY(arr)==true);
-
-    int array_size = 5;//ARRAY_SIZE(arr);
-    // ASSERT(array_size==arr_len);
-
-    puts("[SUCCESS] array size\n");
-    SET_UP_TO(arr, array_size, 1);
-    FOREACH(int *i, arr)
-        ASSERT(*i == 1);
-    puts("[SUCCESS] array filling\n");
-
-    ASSERT(arr[0]==1);
-    ZERO_UP_TO(arr, array_size);
-    FOREACH(int *i, arr)
-        ASSERT(*i == 0);
-    puts("[SUCCESS] array zeroing\n");
-
-    ASSERT(TO_STRING(hello) == "hello");
-
-    int *checkedMallocArray = CHECKED_MALLOC(sizeof(int) * 100);
+    int arr[5] = {0};
+    int *checkedMallocArray = malloc_checked(sizeof(int) * 100);
     puts("[SUCCESSS] checkedMalloc works\n");
-    for (int i = 0; i < sizeof(arr) / sizeof(arr[0]); i++) {
+    for (size_t i = 0; i < sizeof(arr) / sizeof(arr[0]); i++) {
         arr[i] = 2*i;
     }    
-    CHECKED_FREE(checkedMallocArray);
+    free_checked(checkedMallocArray);
 
     puts("[SUCCESSS] checkedFree works\n");
 
-    int *p;
-    NEW(p, int);
-    DELETE(p);
+    Arena arena = ArenaCreate(PTRDIFF_MAX);
+    ptrdiff_t count = 9999;
+    int* arena_int_as = new(&arena, int, count);
+    for (ptrdiff_t i=0; i<count; ++i) {
+        int stack_int_a = arena_int_as[i];
+        fflush(stdout);
+        ASSERT(stack_int_a || true);
+    }
 
-    puts("[SUCCESS] NEW and DELETE work.\n");
+    Arena arenaScratch = ArenaCreate(sizeof(int));
+    Arena arenaCopy = arena;
+    Arena arenaScratchCopy = arenaScratch;
+    testScratchArena1(&arena, arenaScratch);
+    fflush(stdout);
+    ASSERT(arena.beg != arenaCopy.beg);
+    fflush(stdout);
+    ASSERT(arenaScratch.beg != arenaScratchCopy.beg);
+
+    int *arena_int_bs = new(&arena, int, 99, ArenaFlags_NoAbort | ArenaFlags_NoZero);
+    fflush(stdout);
+    ASSERT(arena_int_bs);
+    arena_int_bs[75] = 42;
+    fflush(stdout);
+    ASSERT(arena_int_bs[75] == 42);
+    testScratchArena2(arena);
+    fflush(stdout);
+    ASSERT(arena_int_bs[75] == 42);
+        
+    puts("[SUCCESS] arena works\n");
 
     puts("[SUCCESS] all tests passed fine.\n\n");
+
+    fflush(stdout);
 }

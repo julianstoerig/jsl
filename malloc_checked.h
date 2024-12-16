@@ -15,18 +15,6 @@ void internal_malloc_checked_assert(void *p) {
     }
 }
 
-#define NEW(object, type) \
-    do {\
-        object = malloc(sizeof(type));\
-        internal_malloc_checked_assert(object);\
-    } while (0)
-
-#define DELETE(object) \
-    do {\
-        if (object) free(object);\
-        object = NULL;\
-    } while (0)
-
 void *malloc_checked(int bytes) {
     void *p = malloc(bytes);
     internal_malloc_checked_assert(p);
