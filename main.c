@@ -6,8 +6,6 @@
 #include "meta_macros.h"
 #include "mathy_macros.h"
 #include "assert.h"
-#include "bit_fiddling.h"
-#include "typedefs.h"
 #define JSL_ARENA_IMPLEMENTATION
 #include "arena.h"
 
@@ -168,6 +166,17 @@ int main () {
     testScratchArena2(arena);
     fflush(stdout);
     ASSERT(arena_int_bs[75] == 42);
+
+    Arena arenaC = ArenaCreate(sizeof(int));
+    int *arenaCPtrA = new(&arenaC, int);
+    *arenaCPtrA = 42;
+    ASSERT(arenaCPtrA);
+    int arenaCPtrAVal = *arenaCPtrA;
+    reset(&arenaC);
+    arenaCPtrA = nullptr;
+    int *arenaCPtrB = new(&arenaC, int);
+    *arenaCPtrB = 69;
+    ASSERT(arenaCPtrAVal != *arenaCPtrB);
         
     puts("[SUCCESS] arena works\n");
 
