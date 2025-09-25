@@ -53,3 +53,9 @@ dkms.conf
 .cache/clangd/index
 compile_commands.json
 build
+
+#specific executables
+nob
+
+#build folders
+dsh/build
