@@ -7,8 +7,9 @@ project(dsh
 
 enable_testing()
 
-add_executable(test_trivial test_trivial.c)
-#add_executable(test_arena test_arena.c)
+add_executable(test_trivial
+    test_trivial.c
+    ds.c
+)
 
 add_test(NAME Test-Trivial COMMAND test_trivial)
-#add_test(NAME Test-Arena COMMAND test_arena)
