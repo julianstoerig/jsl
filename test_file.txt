@@ -1,5 +1,0 @@
-this is the test file for
-checking, whether or not    the
-base.h functionality for reading in files
-
-    works as expected.
