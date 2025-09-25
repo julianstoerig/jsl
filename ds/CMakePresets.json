@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 19,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "clang",
+      "displayName": "Clang",
+      "description": "Default build options for Clang",
+      "generator": "Unix Makefiles",
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": {
+        "CMAKE_CXX_FLAGS": "-ggdb -Wall -Wextra -Wno-unused-function -Wno-unused-parameter -Wconversion -Wno-sign-conversion -Wno-pointer-sign -Wdouble-promotion -Wno-gnu-alignof-expression -fsanitize=undefined,unreachable -fsanitize-trap"
+      }
+    }
+  ]
+}
+
