@@ -142,6 +142,10 @@ function F64 f64_inf_neg();
 #define sizeof(E) (S64)sizeof(E)
 #define countof(A) sizeof(A)/sizeof(*A)
 
+#define KiB (1024LL)
+#define MiB (1024LL*KiB)
+#define GiB (1024LL*MiB)
+
 struct Arena;
 typedef void (Oom)(Arena *a);
 struct Arena {
