@@ -88,7 +88,7 @@ void *arena__alloc(Arena *a, S64 element_size, S64 element_count, S64 element_al
     arena__check_invariants(a);
     S64 total_size = ((U64)element_size * (U64)element_count);
     if (total_size < element_size || total_size < element_count)
-        exit(1); // overflow attack
+        exit(1); // overflow bug
 
     S64 padding = u64_from_ptr(a->buf) & ((U64)element_alignment-1);
     S64 available = a->cap - a->len - padding;
