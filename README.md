@@ -4,7 +4,7 @@ is a set of non-performance oriented (although I sincerely attempt to avoid pess
 C-style C++ utilities which I often want in my programs, but which neither
 the C nor C++ standard libraries provide attractive alternatives for.
 
-Since I want to use these in a variety of projects with various legal statuses, I decided to
+Since I want to use these in a variety of projects with various legal status, I decided to
 [UNLICENSE](https://www.unlicense.org) them.
 
 # Contributions
