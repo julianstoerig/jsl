@@ -103,7 +103,7 @@ void *arena__alloc(Arena *a, S64 element_size, S64 element_count, S64 element_al
     void *p = (void*)(a->buf + padding);
     a->buf += padding + total_size;
     if (!(flags & ARENA_FLAG_NO_ZERO))
-        memset(p, 0x00, total_size);
+        memzero_bytes(p, total_size);
     return(p);
 }
 

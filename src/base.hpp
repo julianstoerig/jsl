@@ -101,6 +101,8 @@
 #define member_of(T, m)  (((T*)0)->m)
 #define offfset_of(T, m) uint_from_ptr(&member_of(T, m))
 
+#define memzero_bytes(p, num_bytes) memset((p), 0x00, (num_bytes))
+
 #define min(a, b)       ((a)<(b) ? (a) : (b))
 #define max(a, b)       ((a)>(b) ? (a) : (b))
 #define clamp_top(x, b) min(x, b)
