@@ -58,4 +58,4 @@ build
 nob
 
 #build folders
-ds/build
+/build
