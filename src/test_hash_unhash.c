@@ -1,11 +1,11 @@
-#include "base.hpp"
+#include "base.h"
 
 void test(U64 from, U64 to, U64 prime) {
     for (U64 i=from; i<to; i+=prime)
         assert(i == u64_unhash(u64_hash(i)));
 }
 
-int main() {
+int main(void) {
     test(0ULL, 1ULL<<12, 1);
     test(1ULL<<12, 1ULL<<30, 9001);
     test(1ULL<<30, 1ULL<<50, 45212177ULL);

@@ -1,4 +1,4 @@
-#include "base.hpp"
+#include "base.h"
 
 global S08 s08_min_val = (S08)0x80;
 global S08 s08_max_val = (S08)0x7f;
@@ -18,25 +18,25 @@ global U32 u32_max_val = 0xffffffff;
 global U64 u64_min_val = 0;
 global U64 u64_max_val = 0xffffffffffffffff;
 
-function F32 f32_inf() {
+function F32 f32_inf(void) {
     union {F32 f; U32 i;} v;
     v.i = 0x7f800000UL;
     return(v.f);
 }
 
-function F32 f32_inf_neg() {
+function F32 f32_inf_neg(void) {
     union {F32 f; U32 i;} v;
     v.i = 0xff800000UL;
     return(v.f);
 }
 
-function F64 f64_inf() {
+function F64 f64_inf(void) {
     union {F64 f; U64 i;} v;
     v.i = 0x7ff0000000000000UL;
     return(v.f);
 }
 
-function F64 f64_inf_neg() {
+function F64 f64_inf_neg(void) {
     union {F64 f; U64 i;} v;
     v.i = 0xfff0000000000000UL;
     return(v.f);
@@ -195,7 +195,7 @@ Str str__from_parts(U08 *buf, S64 len) {
 Str str_dup(Str s1, Arena *a) {
     str_check_invariants(s1);
     Str s2 = {};
-    s2.buf = new(a, U08, s1.len);
+    s2.buf = make(a, U08, s1.len);
     if (!s2.buf)
         goto defer;
     s2.len = s1.len;
@@ -210,7 +210,7 @@ char *str_to_cstr(Str s, Arena *a) {
     str_check_invariants(s);
     if (!s.len)
         goto defer;
-    cstr = new(a, char, s.len+1);
+    cstr = make(a, char, s.len+1);
     memcpy(cstr, s.buf, s.len);
     cstr[s.len] = '\0';
 defer:
@@ -235,7 +235,7 @@ Str str_format(Str fmt_str, Arena *a, ...) {
         return(s);
 
     size = n + 1;
-    p = new(a, char, size);
+    p = make(a, char, size);
     if (!p)
         return(s);
 
@@ -328,7 +328,7 @@ Str str_readfile(Str filename, Arena *a) {
         fclose(f);
     }
     fseek(f, 0, SEEK_SET);
-    s.buf = new(a, U08, s.len);
+    s.buf = make(a, U08, s.len);
     if (!s.buf) {
         return(s);
         fclose(f);
@@ -386,14 +386,14 @@ int strlist__check_invariants(StrList l) {
 
 Str strlist_to_str(StrList l, Arena *a) {
     strlist_check_invariants(l);
-    U08 *buf = new(a, U08, l.sum_len);
+    U08 *buf = make(a, U08, l.sum_len);
     S64 cur = 0;
     for (S64 i=0; i<l.len; ++i) {
         Str s = l.buf[i];
         memcpy(buf+cur, s.buf, s.len);
         cur += s.len;
     }
-    return Str{buf, cur};
+    return CLIT(Str){buf, cur};
 }
 
 // hash

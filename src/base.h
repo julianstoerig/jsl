@@ -3,30 +3,49 @@
 #include <stdarg.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 // CONTEXT CRACKING
 
-#define JSL_CPP_20 0
-#define JSL_CPP_17 0
-#define JSL_CPP_14 0
-#define JSL_CPP_11 0
-#define JSL_CPP_98 0
+#define JSL_STD_C89 0
+#define JSL_STD_C99 0
+#define JSL_STD_C11 0
+#define JSL_STD_C17 0
+#define JSL_STD_C23 0
 
-#if __cplusplus > 201703L
-    #undef JSL_CPP_17
-    #define JSL_CPP_17 1
-#elif __cplusplus > 201402L
-    #undef JSL_CPP_14
-    #define JSL_CPP_14 1
-#elif __cplusplus > 201103L
-    #undef JSL_CPP_11
-    #define JSL_CPP_11 1
-#elif __cplusplus > 199901L
-    #undef JSL_CPP_99
-    #define JSL_CPP_99 1
+#if !defined(__STDC__)
+    #error compiler not even C89 compliant
+#else
+    #if __STDC_VERSION__ > 201710L
+        #undef JSL_STD_C23
+        #define JSL_STD_C23 1
+    #elif __STDC_VERSION__ > 201112L
+        #undef JSL_STD_C17
+        #define JSL_STD_C17 1
+    #elif __STDC_VERSION__ > 199901L
+        #undef JSL_STD_C11
+        #define JSL_STD_C11 1
+    #elif __STDC_VERSION__ > 199409L
+        #undef JSL_STD_C99
+        #define JSL_STD_C99 1
+    #else
+        #undef JSL_STD_C89
+        #define JSL_STD_C89 1
+    #endif
+#endif
+
+
+#define JSL_LANG_CPP 0
+#define JSL_LANG_C 0
+
+#if defined(__STDC__)
+    #undef JSL_LANG_C
+    #define JSL_LANG_C 1
+#else
+    #undef JSL_LANG_CPP
+    #define JSL_LANG_CPP 1
 #endif
 
 
@@ -109,13 +128,19 @@
 #define clamp_bot(x, a) max(x, a)
 #define clamp(x, a, b)  clamp_top(b, clamp_bot(a, x))
 
+#if JSL_LANG_C
+    #define CLIT(T)\
+        (T)
+#elif JSL_LANG_CPP
+    #define CLIT(T)\
+        T
+#else
+    #error no language set?
+#endif
+
 #define global   static
 #define persist  static
 #define function static
-
-#define c_linkage_begin extern "C" {
-#define c_linkage_end   }
-#define c_linkage       extern "C"
 
 typedef   int8_t S08;
 typedef  int16_t S16;
@@ -146,7 +171,7 @@ function F64 f64_inf_neg();
 #define MiB (1024LL*KiB)
 #define GiB (1024LL*MiB)
 
-struct Arena;
+typedef struct Arena Arena;
 typedef void (Oom)(Arena *a);
 struct Arena {
     U08 *buf;
@@ -155,11 +180,11 @@ struct Arena {
     Oom *oom;
 };
 
-enum ArenaFlag {
+typedef enum {
     ARENA_FLAG_DEFAULT = 0 << 0,
     ARENA_FLAG_NO_ZERO = 1 << 0,
     ARENA_FLAG_NO_OOM  = 1 << 1,
-};
+} ArenaFlag;
 
 void arena__default_oom(Arena *a);
 
@@ -171,11 +196,11 @@ void arena_free(Arena *a);
 
 void arena_reset(Arena *a); 
 
-#define new(...) newx(__VA_ARGS__, new4, new3, new2) (__VA_ARGS__)
-#define newx(a, b, c, d, e, ...) e
-#define new2(a, T)       (T*)arena__alloc((a), sizeof(T), (0), alignof(T), ARENA_FLAG_DEFAULT)
-#define new3(a, T, n)    (T*)arena__alloc((a), sizeof(T), (n), alignof(T), ARENA_FLAG_DEFAULT)
-#define new4(a, T, n, f) (T*)arena__alloc((a), sizeof(T), (n), alignof(T), (f))
+#define make(...) makex(__VA_ARGS__, make4, make3, make2) (__VA_ARGS__)
+#define makex(a, b, c, d, e, ...) e
+#define make2(a, T)       (T*)arena__alloc((a), sizeof(T), (0), alignof(T), ARENA_FLAG_DEFAULT)
+#define make3(a, T, n)    (T*)arena__alloc((a), sizeof(T), (n), alignof(T), ARENA_FLAG_DEFAULT)
+#define make4(a, T, n, f) (T*)arena__alloc((a), sizeof(T), (n), alignof(T), (f))
 
 void *arena__alloc(Arena *a, S64 element_size, S64 element_count, S64 element_alignment, U08 flags);
 
@@ -188,8 +213,6 @@ void *arena__alloc(Arena *a, S64 element_size, S64 element_count, S64 element_al
 #define push(xs, a)                                                                                \
     (((xs)->len >= (xs)->cap)                                                                      \
         ? da_grow((xs), SIZEOF(*(xs)->buf), ALIGNOF(*(xs)->buf), a, FLAG_NOFLAGS,                  \
-                (U08 *)"`N/A` (member of " #xs ")", (U08 *)__FILE__, __LINE__),                    \
-                (xs)->buf + (xs)->len++                                                            \
         :                                   (xs)->buf + (xs)->len++)
 #else // JSL_TOOLCHAIN_GCC || JSL_TOOLCHAIN_CLANG
 #define push(xs, a)                                                                                \
@@ -216,11 +239,11 @@ B32 u08_isspace(U08 c);
 
 // Strings
 
-struct Str {
+typedef struct {
     U08 *buf;
     S64  len;
     S64  cap;
-};
+} Str;
 
 #define STR_FMT\
     "%.*s"
@@ -271,12 +294,12 @@ U64 str_hash(Str s);
 
 // StringList
 
-struct StrList {
+typedef struct {
     Str *buf;
     S64 len;
     S64 sum_len;
     S64 cap;
-};
+} StrList;
 
 #ifndef NDEBUG
     #define strlist_check_invariants(s)\
