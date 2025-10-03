@@ -143,20 +143,23 @@ void da_grow(void *slice, S64 size, S64 align, Arena *a, U08 flags) {
 // "Char"/U08 stuf
 
 B32 u08_iscontrol(U08 c) {
-    B32 v0 = c < 32;
-    B32 v1 = c == 127;
-    return(v0 | v1);
+    B32 b0 = c < 32;
+    B32 b1 = c == 127;
+    return(b0 | b1);
 }
 
 B32 u08_isalpha(U08 c) {
-    B32 v0 = 'a' <= c && c <= 'z';
-    B32 v1 = 'A' <= c && c <= 'Z';
-    return(v0 | v1);
+    B32 b0 = 'a' <= c;
+    B32 b1 = c <= 'z';
+    B32 b2 = 'A' <= c;
+    B32 b3 = c <= 'Z';
+    return((b0 & b1) | (b2 & b3));
 }
 
 B32 u08_isnumeric(U08 c) {
-    B32 v0 = '0' <= c && c <= '9';
-    return(v0);
+    B32 b0 = '0' <= c;
+    B32 b1 = c <= '9';
+    return(b0 & b1);
 }
 
 B32 u08_isalphanum(U08 c) {
