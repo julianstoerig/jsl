@@ -44,6 +44,7 @@ function F64 f64_inf_neg(void) {
 
 void arena__default_oom(Arena *a) {
     (void)a;
+    assert(0);
     exit(1);
 }
 
@@ -61,10 +62,8 @@ void arena__check_invariants(Arena *a) {
 }
 
 void arena_init(Arena *a, S64 size) {
+    assert(!a->buf);
     arena__check_invariants(a);
-    if (a->buf) {
-        return; // TODO
-    }
     a->buf = (U08*)malloc(size);
     a->len = 0;
     a->cap = size;
@@ -88,7 +87,7 @@ void *arena__alloc(Arena *a, S64 element_size, S64 element_count, S64 element_al
     arena__check_invariants(a);
     S64 total_size = ((U64)element_size * (U64)element_count);
     if (total_size < element_size || total_size < element_count)
-        exit(1); // overflow bug
+        exit(1); // overflow bug //TODO
 
     S64 padding = u64_from_ptr(a->buf) & ((U64)element_alignment-1);
     S64 available = a->cap - a->len - padding;
@@ -264,7 +263,7 @@ U08 str_get_char_at(Str s, S64 i) {
     str_check_invariants(s);
     if (i < 0) i = 0;
     if (i > s.len) i = s.len;
-    return(s.buf[i]);
+    return(get(s, i));
 }
 
 S64 str_index_of(Str s, U08 c) {
@@ -355,6 +354,7 @@ Str str_shift(int *argc, char ***argv) {
 }
 
 U64 str_hash(Str s) {
+    // FNV-1A with murmurhash finaliser
     str_check_invariants(s);
     U64 h = 0x100;
     for (S64 i=0; i<s.len; ++i) {
@@ -393,7 +393,7 @@ Str strlist_to_str(StrList l, Arena *a) {
         memcpy(buf+cur, s.buf, s.len);
         cur += s.len;
     }
-    return CLIT(Str){buf, cur};
+    return (Str){buf, cur};
 }
 
 // hash

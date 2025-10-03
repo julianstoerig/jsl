@@ -1,0 +1,4 @@
+test_trivial 3 0.000335646
+test_get 3 0.000326729
+test_hash_unhash 3 0.0300672
+---

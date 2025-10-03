@@ -104,11 +104,13 @@
     #endif // JSL_TOOLCHAIN
 #endif // !defined(JSL_ASSERT_BREAK)
 
-#if !defined(NDEBUG)
-    #define assert(c) if (!(c)) JSL_ASSERT_BREAK()
-#else // !defined(NDEBUG)
-    #define assert(c)
-#endif // !defined(NDEBUG)
+#if !defined(assert)
+    #if !defined(NDEBUG)
+        #define assert(c) (!(c) ? JSL_ASSERT_BREAK(), 1 : 1)
+    #else // !defined(NDEBUG)
+        #define assert(c) (1)
+    #endif // !defined(NDEBUG)
+#endif // !defined(assert)
 
 #if JSL_TOOLCHAIN_CLANG
     #define u64_from_ptr(p) (U64)(uintptr_t)(p)
@@ -127,16 +129,6 @@
 #define clamp_top(x, b) min(x, b)
 #define clamp_bot(x, a) max(x, a)
 #define clamp(x, a, b)  clamp_top(b, clamp_bot(a, x))
-
-#if JSL_LANG_C
-    #define CLIT(T)\
-        (T)
-#elif JSL_LANG_CPP
-    #define CLIT(T)\
-        T
-#else
-    #error no language set?
-#endif
 
 #define global   static
 #define persist  static
@@ -208,6 +200,16 @@ void *arena__alloc(Arena *a, S64 element_size, S64 element_count, S64 element_al
 #ifndef JSL_DA_DEFAULT_CAP
 #define JSL_DA_DEFAULT_CAP 128
 #endif // JSL_DA_DEFAULT_CAP
+
+#if !defined(NDEBUG)
+    #define get(xs, i)                                          \
+        assert(0 <= (i)),                                       \
+         assert(i < (xs).len),                                  \
+         (xs).buf[(i)]
+#else // !defined(NDEBUG)
+    #define get(xs, i)\
+         ((xs)->buf[(i)])
+#endif // !defined(NDEBUG)
 
 #if JSL_TOOLCHAIN_GCC || JSL_TOOLCHAIN_CLANG
 #define push(xs, a)                                                                                \

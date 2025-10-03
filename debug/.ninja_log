@@ -1,0 +1,21 @@
+# ninja log v6
+76	101	1759341873050894103	test_get	4754226df24a9eba
+1	33	1759351408802092536	CMakeFiles/test_get.dir/test_get.c.o	62f308c48caeac65
+82	104	1759341873056894201	test_hash_unhash	c3a0477668dd79b4
+3	82	1759341872978613555	CMakeFiles/test_hash_unhash.dir/base.c.o	8750ec5369802577
+2	76	1759341872977699219	CMakeFiles/test_get.dir/base.c.o	5e55e79ab05e3b4
+2	74	1759341872976892896	CMakeFiles/test_trivial.dir/base.c.o	92c2ef98df4cb5d3
+75	98	1759341873049894086	test_trivial	11c5c8c502eec744
+1	33	1759351408802438077	CMakeFiles/test_hash_unhash.dir/test_hash_unhash.c.o	71cfa890b25f26fd
+2	22	1759341671189637572	CMakeFiles/test_trivial.dir/test_trivial.c.o	7e5b3f2099798c1a
+3	102	1759491767837679752	build.ninja	249090710be5de03
+3	102	1759491767837679752	/home/julian/scratch/jsl/debug/cmake_install.cmake	249090710be5de03
+3	102	1759491767837679752	/home/julian/scratch/jsl/debug/CTestTestfile.cmake	249090710be5de03
+2	19	1759491797417652733	CMakeFiles/test_get.dir/test_get.c.o	62f308c48caeac65
+3	21	1759491797418317004	CMakeFiles/test_hash_unhash.dir/test_hash_unhash.c.o	71cfa890b25f26fd
+1	38	1759491825768775790	CMakeFiles/test_hash_unhash.dir/base.c.o	8750ec5369802577
+1	39	1759491825767905651	CMakeFiles/test_trivial.dir/base.c.o	92c2ef98df4cb5d3
+1	39	1759491825768510430	CMakeFiles/test_get.dir/base.c.o	5e55e79ab05e3b4
+38	51	1759491825804905983	test_hash_unhash	c3a0477668dd79b4
+39	51	1759491825807183108	test_get	4754226df24a9eba
+39	51	1759491825805905992	test_trivial	11c5c8c502eec744
