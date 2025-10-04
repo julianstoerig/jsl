@@ -196,36 +196,32 @@ void arena_reset(Arena *a);
 
 void *arena__alloc(Arena *a, S64 element_size, S64 element_count, S64 element_alignment, U08 flags);
 
-// dynamic arrays
-#ifndef JSL_DA_DEFAULT_CAP
-#define JSL_DA_DEFAULT_CAP 128
-#endif // JSL_DA_DEFAULT_CAP
+// Stretchy Buffer
 
-#if !defined(NDEBUG)
-    #define get(xs, i)                                          \
-        assert(0 <= (i)),                                       \
-         assert(i < (xs).len),                                  \
-         (xs).buf[(i)]
-#else // !defined(NDEBUG)
-    #define get(xs, i)\
-         ((xs)->buf[(i)])
-#endif // !defined(NDEBUG)
+typedef struct {
+    S64 len;
+    S64 cap;
+    U08 buf[];
+} SbHeader;
 
-#if JSL_TOOLCHAIN_GCC || JSL_TOOLCHAIN_CLANG
-#define push(xs, a)                                                                                \
-    (((xs)->len >= (xs)->cap)                                                                      \
-        ? da_grow((xs), SIZEOF(*(xs)->buf), ALIGNOF(*(xs)->buf), a, FLAG_NOFLAGS,                  \
-        :                                   (xs)->buf + (xs)->len++)
-#else // JSL_TOOLCHAIN_GCC || JSL_TOOLCHAIN_CLANG
-#define push(xs, a)                                                                                \
-    (((xs)->len >= (xs)->cap)                                                                      \
-        ? da_grow((xs), SIZEOF(*(xs)->buf), 16, a, FLAG_NOFLAGS,                                   \
-                (U08 *)"`N/A` (member of " #xs ")", (U08 *)__FILE__, __LINE__),                    \
-                (xs)->buf + (xs)->len++                                                            \
-        :                                   (xs)->buf + (xs)->len++)
-#endif // JSL_TOOLCHAIN_GCC || JSL_TOOLCHAIN_CLANG
+#define sb__header_get(sb) ((SbHeader *)((U08 *)sb - offsetof(SbHeader, buf)))
+#define sb__fits(sb, n) (sb_len(sb) + (n) <= sb_cap(sb))
+#define sb__fit(sb, n)\
+    (sb__fits((sb), (n)) ?\
+            0 :\
+            ((sb) = sb__grow((sb), sb_len(sb) + (n), sizeof(*(sb)))))
 
-void da_grow(void *slice, S64 size, S64 align, Arena *a, U08 flags);
+#define sb_len(sb) ((sb) ? sb__header_get(sb)->len : 0)
+#define sb_cap(sb) ((sb) ? sb__header_get(sb)->cap : 0)
+#define sb_push(sb, e)\
+    (sb__fit((sb), 1),\
+     sb[sb_len(sb)] = (e),\
+     ++(sb__header_get(sb)->len))
+#define sb_reserve(sb, n) sb__fit((sb), (n)-sb__header_get(sb)->len)
+#define sb_clear(sb) sb__header_get(sb)->len = 0
+#define sb_free(sb) free((sb) ? sb__header_get(sb) : 0)
+
+void *sb__grow(void *sb, S64 new_len, S64 element_size);
 
 // "Char"/U08 stuf
 

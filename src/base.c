@@ -106,38 +106,25 @@ void *arena__alloc(Arena *a, S64 element_size, S64 element_count, S64 element_al
     return(p);
 }
 
-void da_grow(void *slice, S64 size, S64 align, Arena *a, U08 flags) {
-    struct {
-        U08 *buf;
-        S64  len;
-        S64  cap;
-    } replica;
+// Stretchy Buffer
 
-    memcpy(&replica, slice, sizeof(replica));
-
-    assert(replica.buf || !replica.len);
-    assert(replica.buf || !replica.cap);
-    assert(replica.len >= 0);
-    assert(replica.cap >= 0);
-    assert(replica.cap >= replica.len);
-
-    if (!replica.buf) {
-        replica.cap = 1;
-        replica.buf = (U08*)arena__alloc(a, size, JSL_DA_DEFAULT_CAP, align, flags);
-    } else if (a->buf + a->len == replica.buf + size * replica.cap) {
-        // if the dynamic array allocation is the last one made on the arena, it can be extended
-        // in place by simple telling the arena to mark the space we want to extend into as used,
-        // since we already occupy it, there is no need to do anything with the returned pointer.
-        // TODO: consider possible error handling for FLAG_SOFTFAIL's `NULL` return
-        (void)arena__alloc(a, size, 2*replica.cap, /*align=*/1, flags);
+void *sb__grow(void *sb, S64 new_len, S64 element_size) {
+    S64 new_cap = max(1 + 2*sb_cap(sb), new_len);
+    assert(new_len <= new_cap);
+    S64 new_size = offsetof(SbHeader, buf) + new_cap*element_size;
+    SbHeader *new_sb = 0;
+    if (sb) {
+        S64 len = sb__header_get(sb)->len;
+        new_sb = realloc(sb__header_get(sb), new_size);
+        if (!new_sb) exit(1); // TODO: add customisable exit handling
+        new_sb->len = len;
     } else {
-        void *buf = arena__alloc(a, size, 2*replica.cap, align, flags);
-        memcpy(buf, replica.buf, size*replica.len);
-        replica.buf = (U08*)buf;
+        new_sb = malloc(new_size);
+        if (!new_sb) exit(1); // TODO: add customisable exit handling
+        new_sb->len = 0;
     }
-
-    replica.cap *= 2;
-    memcpy(slice, &replica, sizeof(replica));
+    new_sb->cap = new_cap;
+    return(new_sb->buf);
 }
 
 // "Char"/U08 stuf
@@ -266,7 +253,7 @@ U08 str_get_char_at(Str s, S64 i) {
     str_check_invariants(s);
     if (i < 0) i = 0;
     if (i > s.len) i = s.len;
-    return(get(s, i));
+    return(s.buf[i]);
 }
 
 S64 str_index_of(Str s, U08 c) {
