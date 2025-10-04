@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.31)
 
 project(JSL
-        VERSION 0.1
+        VERSION 0.2
         LANGUAGES C)
 
 enable_testing()
