@@ -16,5 +16,5 @@ but do not be annoyed if I fully rewrite it myself.
 
 # To Do
 
-- [ ] Stretchy Buffer / Dynamic Array
+- [x] Stretchy Buffer / Dynamic Array
 - [ ] Unicode (UTF-8) Aware Strings
