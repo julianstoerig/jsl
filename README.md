@@ -13,3 +13,8 @@ Due to the challenges imposed by copyright law, I do not accept patches
 written by somebody else. If you would like to report a bug or ask for a
 feature to be implemented, it is still useful for me if you append a patch,
 but do not be annoyed if I fully rewrite it myself.
+
+# To Do
+
+- [ ] Stretchy Buffer / Dynamic Array
+- [ ] Unicode (UTF-8) Aware Strings
