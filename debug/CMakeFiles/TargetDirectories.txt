@@ -1,6 +1,7 @@
 /home/julian/scratch/jsl/debug/CMakeFiles/test_trivial.dir
-/home/julian/scratch/jsl/debug/CMakeFiles/test_get.dir
+/home/julian/scratch/jsl/debug/CMakeFiles/test_sb_push_len_index_free.dir
 /home/julian/scratch/jsl/debug/CMakeFiles/test_hash_unhash.dir
+/home/julian/scratch/jsl/debug/CMakeFiles/test_sb_fibonacci.dir
 /home/julian/scratch/jsl/debug/CMakeFiles/test.dir
 /home/julian/scratch/jsl/debug/CMakeFiles/edit_cache.dir
 /home/julian/scratch/jsl/debug/CMakeFiles/rebuild_cache.dir

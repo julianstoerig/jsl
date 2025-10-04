@@ -1,4 +1,9 @@
-test_trivial 3 0.000335646
-test_get 3 0.000326729
-test_hash_unhash 3 0.0300672
+test_trivial 51 2.01255e-05
+test_get 4 0.000157569
+test_hash_unhash 51 0.00172475
+test_sb_push_get_len 0 0
+test_sb_set 0 0
+test_sb_push_len_index 34 0.00375925
+test_sb_fibonacci 13 0.00635967
+test_sb_push_len_index_free 2 0.0610011
 ---

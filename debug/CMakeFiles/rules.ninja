@@ -35,7 +35,7 @@ rule C_EXECUTABLE_LINKER__test_trivial_Debug
 #############################################
 # Rule for compiling C files.
 
-rule C_COMPILER__test_get_unscanned_Debug
+rule C_COMPILER__test_sb_push_len_index_free_unscanned_Debug
   depfile = $DEP_FILE
   deps = gcc
   command = ${LAUNCHER}${CODE_CHECK}/usr/bin/cc $DEFINES $INCLUDES $FLAGS -MD -MT $out -MF $DEP_FILE -o $out -c $in
@@ -45,7 +45,7 @@ rule C_COMPILER__test_get_unscanned_Debug
 #############################################
 # Rule for linking C executable.
 
-rule C_EXECUTABLE_LINKER__test_get_Debug
+rule C_EXECUTABLE_LINKER__test_sb_push_len_index_free_Debug
   depfile = $DEP_FILE
   deps = gcc
   command = $PRE_LINK && /usr/bin/cc $FLAGS $LINK_FLAGS $in -o $TARGET_FILE $LINK_PATH $LINK_LIBRARIES && $POST_BUILD
@@ -67,6 +67,27 @@ rule C_COMPILER__test_hash_unhash_unscanned_Debug
 # Rule for linking C executable.
 
 rule C_EXECUTABLE_LINKER__test_hash_unhash_Debug
+  depfile = $DEP_FILE
+  deps = gcc
+  command = $PRE_LINK && /usr/bin/cc $FLAGS $LINK_FLAGS $in -o $TARGET_FILE $LINK_PATH $LINK_LIBRARIES && $POST_BUILD
+  description = Linking C executable $TARGET_FILE
+  restat = $RESTAT
+
+
+#############################################
+# Rule for compiling C files.
+
+rule C_COMPILER__test_sb_fibonacci_unscanned_Debug
+  depfile = $DEP_FILE
+  deps = gcc
+  command = ${LAUNCHER}${CODE_CHECK}/usr/bin/cc $DEFINES $INCLUDES $FLAGS -MD -MT $out -MF $DEP_FILE -o $out -c $in
+  description = Building C object $out
+
+
+#############################################
+# Rule for linking C executable.
+
+rule C_EXECUTABLE_LINKER__test_sb_fibonacci_Debug
   depfile = $DEP_FILE
   deps = gcc
   command = $PRE_LINK && /usr/bin/cc $FLAGS $LINK_FLAGS $in -o $TARGET_FILE $LINK_PATH $LINK_LIBRARIES && $POST_BUILD
