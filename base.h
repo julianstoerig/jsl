@@ -164,23 +164,25 @@ function F64 f64_inf_neg();
 #define GiB (1024LL*MiB)
 
 typedef struct Arena Arena;
+typedef void (Oom)(Arena *a);
 struct Arena {
     U08 *buf;
     S64  len;
     S64  cap;
-    Arena *next;
+    Oom *oom;
 };
-
-#define ARENA_DEFAULT_SIZE (1LL*KiB)
 
 typedef enum {
     ARENA_FLAG_DEFAULT = 0 << 0,
     ARENA_FLAG_NO_ZERO = 1 << 0,
+    ARENA_FLAG_NO_OOM  = 1 << 1,
 } ArenaFlag;
+
+void arena__default_oom(Arena *a);
 
 void arena__check_invariants(Arena *a);
 
-void arena__init(Arena *a, S64 size);
+void arena_init(Arena *a, S64 size);
 
 void arena_free(Arena *a);
 
@@ -188,7 +190,7 @@ void arena_reset(Arena *a);
 
 #define make(...) makex(__VA_ARGS__, make4, make3, make2) (__VA_ARGS__)
 #define makex(a, b, c, d, e, ...) e
-#define make2(a, T)       (T*)arena__alloc((a), sizeof(T), (1), alignof(T), ARENA_FLAG_DEFAULT)
+#define make2(a, T)       (T*)arena__alloc((a), sizeof(T), (0), alignof(T), ARENA_FLAG_DEFAULT)
 #define make3(a, T, n)    (T*)arena__alloc((a), sizeof(T), (n), alignof(T), ARENA_FLAG_DEFAULT)
 #define make4(a, T, n, f) (T*)arena__alloc((a), sizeof(T), (n), alignof(T), (f))
 

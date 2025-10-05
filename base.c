@@ -61,13 +61,13 @@ void arena__check_invariants(Arena *a) {
     assert(a->len <= a->cap);
 }
 
-void arena__init(Arena *a, S64 size) {
+void arena_init(Arena *a, S64 size) {
     assert(!a->buf);
     arena__check_invariants(a);
     a->buf = (U08*)malloc(size);
     a->len = 0;
     a->cap = size;
-    a->next = 0;
+    a->oom = arena__default_oom;
 }
 
 void arena_free(Arena *a) {
@@ -85,9 +85,6 @@ void *arena__alloc(Arena *a, S64 element_size, S64 element_count, S64 element_al
     assert(0 <= element_count);
     assert(0 <  element_alignment);
     arena__check_invariants(a);
-    if (!a->buf)
-        arena__init(a, ARENA_DEFAULT_SIZE);
-    arena__check_invariants(a);
     S64 total_size = ((U64)element_size * (U64)element_count);
     if (total_size < element_size || total_size < element_count)
         exit(1); // overflow bug //TODO
@@ -95,9 +92,13 @@ void *arena__alloc(Arena *a, S64 element_size, S64 element_count, S64 element_al
     S64 padding = u64_from_ptr(a->buf) & ((U64)element_alignment-1);
     S64 available = a->cap - a->len - padding;
 
-    if (available < 0)
-        return 0;
-
+    if (available < 0) {
+        if (flags & ARENA_FLAG_NO_OOM) {
+            return 0;
+        } else {
+            a->oom(a);
+        }
+    }
     void *p = (void*)(a->buf + padding);
     a->buf += padding + total_size;
     if (!(flags & ARENA_FLAG_NO_ZERO))
