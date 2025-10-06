@@ -20,3 +20,6 @@ add_test(NAME test_sb_fibonacci COMMAND test_sb_fibonacci)
 
 add_executable(test_arena base.c test_arena.c)
 add_test(NAME test_arena COMMAND test_arena)
+
+add_executable(test_da base.c test_da.c)
+add_test(NAME test_da COMMAND test_da)

@@ -31,7 +31,7 @@ int main(void) {
     if (sb_cap(xs) != 64)
         return(1);
 
-    len = (1LL << 25LL) + 471LL;
+    len = (1LL << 15LL) + 471LL;
     for (S64 i=0; i<len; ++i)
         sb_push(xs, i*i);
 

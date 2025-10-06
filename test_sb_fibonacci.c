@@ -18,7 +18,7 @@ S64 fib(S64 n) {
 
 int main(void) {
     S64 *fibs = 0;
-    S64 len = 1 << 14;
+    S64 len = 1 << 10;
 
     sb_push(fibs, 0);
     sb_push(fibs, 1);

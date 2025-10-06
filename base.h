@@ -156,7 +156,7 @@ function F64 f64_inf();
 function F64 f64_inf_neg();
 
 #define alignof(T) (S64)alignof(T)
-#define sizeof(E) (S64)sizeof(E)
+#define sizeof(T) (S64)sizeof(T)
 #define countof(A) sizeof(A)/sizeof(*A)
 
 #define KiB (1024LL)
@@ -222,6 +222,62 @@ typedef struct {
 #define sb_free(sb) free((sb) ? sb__header_get(sb) : 0)
 
 void *sb__grow(void *sb, S64 new_len, S64 element_size);
+
+// Explicit Data Structures via Headers
+
+#define DA_DEFAULT_CAPACITY 16
+
+typedef struct DynamicArrayHeader DynamicArrayHeader;
+struct DynamicArrayHeader {
+    S64 len;
+    S64 cap;
+};
+#define __DYNAMIC_ARRAY_HEADER__ DynamicArrayHeader da_hdr
+
+#define da_push(xs, x)\
+    do {\
+        assert(0 <= (xs).da_hdr.len);\
+        assert(0 <= (xs).da_hdr.cap);\
+        assert((xs).da_hdr.len <= (xs).da_hdr.cap);\
+        if ((xs).da_hdr.len >= (xs).da_hdr.cap) {\
+            if (!(xs).v) {\
+                (xs).da_hdr.cap = DA_DEFAULT_CAPACITY;\
+            }\
+            S64 new_cap = (xs).da_hdr.cap*2;\
+            void *p = realloc((xs).v, sizeof(*((xs).v))*new_cap);\
+            assert(p);\
+            if (!p) {\
+                abort();\
+            }\
+            (xs).v = p;\
+            (xs).da_hdr.cap = new_cap;\
+        }\
+        xs.v[(xs).da_hdr.len++] = (x);\
+    } while (0)
+
+#define da_pop(xs)\
+    ((xs).v[--(xs).da_hdr.len])
+
+#define da_get(xs, i) (\
+     ((0 <= (i)) && ((i) < (xs).da_hdr.len)) ?\
+          (xs).v[(i)] :\
+          (abort(), (xs).v[-99999999LL]))
+
+#define da_len(xs)\
+    (xs).da_hdr.len
+
+#define da_clear(xs)\
+    (xs).da_hdr.len = 0
+
+#define da_del(xs, i)\
+    do {\
+        void *p_to_remove = (xs).v + (i);\
+        void *p_one_after = (xs).v + (i) + 1;\
+        memmove(p_to_remove, p_one_after, sizeof(*(xs).v)*((xs).da_hdr.len-(i)));\
+    } while(0)
+
+#define da_delswap(xs, i)\
+        ((xs).v[(i)] = (xs).v[--(xs).da_hdr.len])
 
 // "Char"/U08 stuf
 
