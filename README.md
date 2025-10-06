@@ -17,4 +17,14 @@ but do not be annoyed if I fully rewrite it myself.
 # To Do
 
 - [x] Stretchy Buffer / Dynamic Array
+- [ ] Add Explicit
+    - [ ] Dynamic Arrays
+    - [ ] Hash Tables
+    - [ ] Pools
+    - [ ] Linked Lists
+    - [ ] Pools
+    - [ ] Linked Lists
+        - [ ] Stacks
+        - [ ] Queues
+        - [ ] Doubly Linked Lists
 - [ ] Unicode (UTF-8) Aware Strings
