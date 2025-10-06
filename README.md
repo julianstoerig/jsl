@@ -1,7 +1,7 @@
 # JSL
 
 is a set of non-performance oriented (although I sincerely attempt to avoid pessimisation),
-C utilities which I often want in my programs, but which the C standard library
+strictly **C99** utilities which I often want in my programs, but which the C standard library
 does not provide attractive alternatives for.
 
 Since I want to use these in a variety of projects with varying legal status, I decided to

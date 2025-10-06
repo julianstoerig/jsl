@@ -155,9 +155,16 @@ function F64 f64_inf();
 
 function F64 f64_inf_neg();
 
-#define alignof(T) (S64)alignof(T)
 #define sizeof(T) (S64)sizeof(T)
 #define countof(A) sizeof(A)/sizeof(*A)
+
+#if JSL_STD_C23
+    #define alignof(T) (S64)alignof(T)
+#elif JSL_STD_C17 || JSL_STD_C11
+    #define alignof(T) (S64)_Alignof(T)
+#else
+    #define alignof(T) (S64)(sizeof(T) > sizeof(uintptr_t) ? sizeof(uintptr_t) : sizeof(T))
+#endif // JSL_STD
 
 #define KiB (1024LL)
 #define MiB (1024LL*KiB)

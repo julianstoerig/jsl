@@ -4,6 +4,10 @@ project(JSL
         VERSION 0.2
         LANGUAGES C)
 
+set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_C_EXTENSIONS OFF)
+
 enable_testing()
 
 add_executable(test_trivial base.c test_trivial.c)
