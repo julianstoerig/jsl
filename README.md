@@ -18,7 +18,7 @@ but do not be annoyed if I fully rewrite it myself.
 
 - [x] Stretchy Buffer / Dynamic Array
 - [ ] Add Explicit
-    - [ ] Dynamic Arrays
+    - [x] Dynamic Arrays
     - [ ] Hash Tables
     - [ ] Pools
     - [ ] Linked Lists
