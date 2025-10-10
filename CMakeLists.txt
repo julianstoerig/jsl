@@ -1,12 +1,15 @@
 cmake_minimum_required(VERSION 3.31)
 
 project(JSL
-        VERSION 0.2
+        VERSION 0.3
         LANGUAGES C)
 
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
+set(CTEST_CMAKE_GENERATOR Ninja)
+set(CTEST_CONFIGURATION_TYPE Debug)
+set(CTEST_MEMORYCHECK_TYPE AddressSanitizer)
 
 enable_testing()
 

@@ -127,6 +127,51 @@ void *sb__grow(void *sb, S64 new_len, S64 element_size) {
     return(new_sb->buf);
 }
 
+// Dynamic Array
+
+void da__check_invariants(da__DynamicArray *xs) {
+    da__DynamicArray arr;
+    memcpy(&arr, xs, sizeof(da__DynamicArray));
+
+    assert(0 <= arr.len);
+    assert(0 <= arr.cap);
+    assert(arr.len <= arr.cap);
+    assert(!arr.cap || arr.buf); // left implies right
+}
+
+void da__grow(void *xs, ptrdiff_t size) {
+    da__DynamicArray arr;
+    memcpy(&arr, xs, sizeof(da__DynamicArray));
+    da__check_invariants(&arr);
+
+    arr.cap = arr.cap ? arr.cap : 128;
+    void *p = malloc(2*size*arr.cap);
+    if (arr.len)
+        memcpy(p, arr.buf, size*arr.len);
+    arr.buf = p;
+    memcpy(xs, &arr, sizeof(arr));
+}
+
+void da__clear(void *xs) {
+    da__DynamicArray arr;
+    memcpy(&arr, xs, sizeof(da__DynamicArray));
+    da__check_invariants(xs);
+
+    arr.len = 0;
+    memcpy(xs, &arr, sizeof(arr));
+}
+
+void da__free(void *xs) {
+    da__DynamicArray arr;
+    memcpy(&arr, xs, sizeof(da__DynamicArray));
+    da__check_invariants(xs);
+
+    arr.len = 0;
+    arr.cap = 0;
+    arr.buf = 0;
+    memcpy(xs, &arr, sizeof(arr));
+}
+
 // "Char"/U08 stuf
 
 B32 u08_iscontrol(U08 c) {
@@ -343,58 +388,82 @@ Str str_shift(int *argc, char ***argv) {
     return(s);
 }
 
-U64 str_hash(Str s) {
-    // FNV-1A with murmurhash finaliser
-    str_check_invariants(s);
-    U64 h = 0x100;
-    for (S64 i=0; i<s.len; ++i) {
-        h ^= s.buf[i] & 255;
-        h *= 1111111111111111111;
-    }
-    return(h);
-}
-
-// StringList
-
-int strlist__check_invariants(StrList l) {
-    if (!l.buf) {
-        assert(!l.len);
-        assert(!l.sum_len);
-        assert(!l.cap);
-    } else {
-        assert(0 <= l.len);
-        assert(0 <= l.sum_len);
-        assert(0 <= l.cap);
-        assert(l.len <= l.cap);
-        S64 sum_len = 0;
-        for (S64 i=0; i<l.cap; ++i)
-            sum_len += l.buf[i].len;
-        assert(l.sum_len == sum_len);
-    }
-    return(0);
-}
-
-Str strlist_to_str(StrList l, Arena *a) {
-    strlist_check_invariants(l);
-    U08 *buf = make(a, U08, l.sum_len);
-    S64 cur = 0;
-    for (S64 i=0; i<l.len; ++i) {
-        Str s = l.buf[i];
-        memcpy(buf+cur, s.buf, s.len);
-        cur += s.len;
-    }
-    return (Str){buf, cur};
-}
-
 // hash
-U64 u64_hash(U64 x) {
+
+// impl stolen from
+// https://github.com/demetri/scribbles/blob/master/hashing/
+
+U64 xxh64(const void *key, S64 len, U64 h) {
+  // primes used in mul-rot updates
+  U64 p1 = 0x9e3779b185ebca87, p2 = 0xc2b2ae3d27d4eb4f,
+    p3 = 0x165667b19e3779f9, p4 =0x85ebca77c2b2ae63, p5 = 0x27d4eb2f165667c5;
+
+  // inital 32-byte (4x8) wide hash state
+  U64 s[4] = {h+p1+p2, h+p2, h, h-p1};
+
+  // bulk work: process all 32 byte blocks 
+  for (S64 i=0; i < (len/32); i++) {
+    U64 b[4];
+    memcpy(b, key + 4*i, sizeof(b));
+
+    for (S64 j=0;j<4;j++) b[j] = b[j]*p2+s[j];
+    for (S64 j=0;j<4;j++) s[j] = ((b[j] << 31) | (b[j] >> 33))*p1;
+  }
+
+  // mix 32-byte state down to 8-byte state, initalize to value for short keys
+  U64 s64 = (s[2] + p5);
+  if (len >= 32) {
+    s64  = ((s[0] << 1)  | (s[0] >> 63)) + ((s[1] << 7)  | (s[1] >> 57)) +
+           ((s[2] << 12) | (s[2] >> 52)) + ((s[3] << 18) | (s[3] >> 46));
+    for (S64 i=0; i<4;i++) {
+      U64 ps = (((s[i]*p2) << 31) | ((s[i]*p2) >> 33))*p1;
+      s64 = (s64 ^ ps)*p1 + p4;
+    }
+  }
+  s64 += len;
+
+  // up to 31 bytes remain, process 0-3 8 byte blocks
+  U08 *tail = (U08 *) (key + (len/32)*32);
+  for (S64 i=0;i < (len & 31) / 8; i++,tail+=8) {  
+    U64 b;
+    memcpy(&b, tail, sizeof(U64));
+
+    b *= p2;
+    b = (((b << 31)| (b >> 33))*p1) ^ s64;
+    s64 = ((b << 27) | (b >> 37))*p1 + p4;
+  }
+
+  // up to 7 bytes remain, process 0-1 4 byte block
+  for (S64 i=0;i< (len & 7) / 4; i++, tail +=4) {
+    U64 b;
+    memcpy(&b, tail, sizeof(b));
+
+    b = (s64 ^ b) * p1;
+    s64 = ((b << 23) | (b >> 41))*p2 + p3;
+  }
+
+  // up to 3 bytes remain, process 0-3 1 byte blocks
+  for (S64 i=0;i<(len & 3); i++,tail++) {
+    U64 b = s64 ^ (*tail)*p5;
+    s64 = ((b << 11) | (b >> 53))*p1;
+  }
+
+  // finalization mix
+  s64 =  (s64 ^ (s64 >> 33))*p2;
+  s64 =  (s64 ^ (s64 >> 29))*p3;
+  return (s64 ^ (s64 >> 32)); 
+}
+
+// bijective hash function
+
+U64 u64_hash_bij(U64 x) {
     x = (x ^ (x >> 30ULL)) * 0xbf58476d1ce4e5b9ULL;
     x = (x ^ (x >> 27ULL)) * 0x94d049bb133111ebULL;
     x = x ^ (x >> 31ULL);
     return(x);
 }
 
-U64 u64_unhash(U64 x) {
+U64 u64_unhash_bij(U64 x) {
     x = (x ^ (x >> 31ULL) ^ (x >> 62ULL)) * 0x319642b2d24d8ec3ULL;
     x = (x ^ (x >> 27ULL) ^ (x >> 54ULL)) * 0x96de1b173f119089ULL;
     x =  x ^ (x >> 30ULL) ^ (x >> 60ULL);

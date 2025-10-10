@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <complex.h>
 
 // CONTEXT CRACKING
 
@@ -134,18 +135,20 @@
 #define persist  static
 #define function static
 
-typedef   int8_t S08;
-typedef  int16_t S16;
-typedef  int32_t S32;
-typedef  int64_t S64;
-typedef  uint8_t U08;
-typedef uint16_t U16;
-typedef uint32_t U32;
-typedef uint64_t U64;
-typedef  uint8_t B08;
-typedef uint32_t B32;
-typedef    float F32;
-typedef   double F64;
+typedef   int8_t         S08;
+typedef  int16_t         S16;
+typedef  int32_t         S32;
+typedef  int64_t         S64;
+typedef  uint8_t         U08;
+typedef uint16_t         U16;
+typedef uint32_t         U32;
+typedef uint64_t         U64;
+typedef  uint8_t         B08;
+typedef uint32_t         B32;
+typedef    float         F32;
+typedef   double         F64;
+typedef  float _Complex  C32; // TODO: sizeof(C32) == 64,  don't like it
+typedef  double _Complex C64; // TODO: sizeof(C64) == 128, don't like it
 
 function F32 f32_inf();
 
@@ -234,57 +237,33 @@ void *sb__grow(void *sb, S64 new_len, S64 element_size);
 
 #define DA_DEFAULT_CAPACITY 16
 
-typedef struct DynamicArrayHeader DynamicArrayHeader;
-struct DynamicArrayHeader {
-    S64 len;
-    S64 cap;
+typedef struct da__DynamicArray da__DynamicArray;
+struct da__DynamicArray {
+    char    *buf;
+    int64_t len;
+    int64_t cap;
 };
-#define __DYNAMIC_ARRAY_HEADER__ DynamicArrayHeader da_hdr
 
-#define da_push(xs, x)\
-    do {\
-        assert(0 <= (xs).da_hdr.len);\
-        assert(0 <= (xs).da_hdr.cap);\
-        assert((xs).da_hdr.len <= (xs).da_hdr.cap);\
-        if ((xs).da_hdr.len >= (xs).da_hdr.cap) {\
-            if (!(xs).v) {\
-                (xs).da_hdr.cap = DA_DEFAULT_CAPACITY;\
-            }\
-            S64 new_cap = (xs).da_hdr.cap*2;\
-            void *p = realloc((xs).v, sizeof(*((xs).v))*new_cap);\
-            assert(p);\
-            if (!p) {\
-                abort();\
-            }\
-            (xs).v = p;\
-            (xs).da_hdr.cap = new_cap;\
-        }\
-        xs.v[(xs).da_hdr.len++] = (x);\
-    } while (0)
+#define __DYNAMIC_ARRAY_HEADER__(T)\
+    T *buf;\
+    S64 len;\
+    S64 cap;
 
-#define da_pop(xs)\
-    ((xs).v[--(xs).da_hdr.len])
+void da__clear(void *xs);
+void da__free(void *xs);
+void da__grow(void *xs, ptrdiff_t size);
 
-#define da_get(xs, i) (\
-     ((0 <= (i)) && ((i) < (xs).da_hdr.len)) ?\
-          (xs).v[(i)] :\
-          (abort(), (xs).v[-99999999LL]))
-
-#define da_len(xs)\
-    (xs).da_hdr.len
+#define da_push(xs)\
+    ((xs).len >= (xs).cap ?\
+        da__grow(&(xs), sizeof(*(xs).buf)),\
+            (xs).buf + (xs).len++ :\
+            (xs).buf + (xs).len++)
 
 #define da_clear(xs)\
-    (xs).da_hdr.len = 0
+    da__clear((da__DynamicArray *)&(xs))
 
-#define da_del(xs, i)\
-    do {\
-        void *p_to_remove = (xs).v + (i);\
-        void *p_one_after = (xs).v + (i) + 1;\
-        memmove(p_to_remove, p_one_after, sizeof(*(xs).v)*((xs).da_hdr.len-(i)));\
-    } while(0)
-
-#define da_delswap(xs, i)\
-        ((xs).v[(i)] = (xs).v[--(xs).da_hdr.len])
+#define da_free(xs)\
+    da__free((da__DynamicArray *)&(xs))
 
 // "Char"/U08 stuf
 
@@ -353,31 +332,13 @@ Str str_shift(int *argc, char ***argv);
 
 U64 str_hash(Str s);
 
-// StringList
-
-typedef struct {
-    Str *buf;
-    S64 len;
-    S64 sum_len;
-    S64 cap;
-} StrList;
-
-#ifndef NDEBUG
-    #define strlist_check_invariants(s)\
-        strlist__check_invariants(s)
-#else // NDEBUG
-    #define strlist_check_invariants(s)
-#endif // NDEBUG
-
-int strlist__check_invariants(StrList l);
-
-Str strlist_to_str(StrList l, Arena *a);
-
 // hash
 
-U64 u64_hash(U64 x);
+U64 xxh64(const void* key, S64 len, U64 h);
 
-U64 u64_unhash(U64 x);
+U64 u64_hash_bij(U64 x);
+
+U64 u64_unhash_bij(U64 x);
 
 /* Example MSI Hash Table
 * refer to skeeto @ nullprogram.com for more info
