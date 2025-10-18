@@ -37,8 +37,8 @@ add_test(NAME test_da COMMAND test_da)
 add_executable(test_da_arena base.c test_da_arena.c)
 add_test(NAME test_da_arena COMMAND test_da_arena)
 
-add_executable(test_sb base.c test_sb.c)
-add_test(NAME test_sb COMMAND test_sb)
+add_executable(test_string_builder base.c test_string_builder.c)
+add_test(NAME test_string_builder COMMAND test_string_builder)
 
 add_executable(test_ppm base.c test_ppm.c)
 add_test(NAME test_ppm COMMAND test_ppm)
