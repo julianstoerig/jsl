@@ -34,8 +34,5 @@ add_test(NAME test_arena_auto_init COMMAND test_arena_auto_init)
 add_executable(test_da base.c test_da.c)
 add_test(NAME test_da COMMAND test_da)
 
-add_executable(test_da_arena base.c test_da_arena.c)
-add_test(NAME test_da_arena COMMAND test_da_arena)
-
 add_executable(test_ppm base.c test_ppm.c)
 add_test(NAME test_ppm COMMAND test_ppm)

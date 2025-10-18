@@ -119,65 +119,44 @@ void *arena__alloc(Arena *a, S64 element_size, S64 element_count, S64 element_al
 
 // Dynamic Array
 
-void da__check_invariants(da__DynamicArray *xs) {
-    da__DynamicArray arr;
-    memcpy(&arr, xs, sizeof(da__DynamicArray));
+void *array_grow(Arena *a, ArrayHeader *hdr, void *v,
+        S64 item_size, S64 item_len, B32 zero_mem) {
+    assert(hdr->len >= 0);
+    assert(hdr->cap >= 0);
+    assert(hdr->cap >= hdr->len);
+    assert(item_size > 0);
+    assert(item_len > 0);
 
-    assert(0 <= arr.len);
-    assert(0 <= arr.cap);
-    assert(arr.len <= arr.cap);
-    assert(!arr.cap || arr.buf); // left implies right
-}
+    B32 grew = 0;
 
-void da__grow(void *xs, S64 size) {
-    da__DynamicArray arr;
-    memcpy(&arr, xs, sizeof(da__DynamicArray));
-    da__check_invariants(&arr);
-
-    arr.cap = arr.cap ? 2*arr.cap : 128;
-    void *p = 0;
-    if (arr.a) {
-        p = arena__alloc(arr.a, size, arr.cap, size, ARENA_FLAG_DEFAULT);
-    } else {
-        p = malloc(size*arr.cap);
+    if (hdr->cap == 0) {
+        hdr->cap = 128;
+        grew = 1;
     }
-    if (arr.len)
-        memcpy(p, arr.buf, size*arr.len);
-    arr.buf = p;
-    memcpy(xs, &arr, sizeof(arr));
-}
-
-void da__clear(void *xs) {
-    da__DynamicArray arr;
-    memcpy(&arr, xs, sizeof(da__DynamicArray));
-    da__check_invariants(xs);
-
-    arr.len = 0;
-    memcpy(xs, &arr, sizeof(arr));
-}
-
-void da__free(void *xs) {
-    da__DynamicArray arr;
-    memcpy(&arr, xs, sizeof(da__DynamicArray));
-    da__check_invariants(xs);
-
-    arr.len = 0;
-    arr.cap = 0;
-    arr.buf = 0;
-    memcpy(xs, &arr, sizeof(arr));
-}
-
-B32 da__is_in_bounds(void *xs, S64 i) {
-    da__DynamicArray arr;
-    memcpy(&arr, xs, sizeof(da__DynamicArray));
-    da__check_invariants(xs);
-    B32 in_bounds = (0 <= i) & (i < arr.len);
-    if (in_bounds) {
-        return 1;
-    } else {
-        return 0;
+    while (hdr->len+item_len > hdr->cap) {
+        hdr->cap = 2*hdr->cap;
+        grew = 1;
     }
+
+    if (!grew) return(v);
+
+    U32 flags = ARENA_FLAG_DEFAULT;
+    if (!zero_mem) flags |= ARENA_FLAG_NO_ZERO;
+    void *p = arena__alloc(a, item_size, hdr->cap, item_size, flags);
+    memcpy(p, v, hdr->len * item_size);
+    return(p);
 }
+
+void array_shift(ArrayHeader *hdr, void *v,
+        S64 item_size, S64 by_items, S64 from_index) {
+    void *into_ptr = (U08 *)v + item_size*(from_index*by_items);
+    void *from_ptr = (U08 *)v + item_size*from_index;
+    S64 for_items = hdr->len - from_index;
+    S64 for_bytes = item_size * for_items;
+    memcpy(into_ptr, from_ptr, for_bytes);
+    hdr->len += by_items;
+}
+
 
 // "Char"/U08 stuf
 

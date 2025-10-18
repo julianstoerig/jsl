@@ -233,34 +233,77 @@ void *arena__alloc(Arena *a, S64 element_size, S64 element_count, S64 element_al
 
 #define DA_DEFAULT_CAPACITY 16
 
-typedef struct da__DynamicArray da__DynamicArray;
-struct da__DynamicArray {
-    char    *buf;
-    int64_t len;
-    int64_t cap;
-    Arena *a;
+typedef struct ArrayHeader ArrayHeader;
+struct ArrayHeader {
+    S64 len;
+    S64 cap;
 };
+#define _ArrayHeader_ struct { S64 len; S64 cap; }
 
-void da__clear(void *xs);
-void da__free(void *xs);
-void da__grow(void *xs, S64 size);
-B32  da__is_in_bounds(void *xs, S64 i);
+#define array_header_get(arr) ((ArrayHeader *)&(arr))
 
-#define da_push(xs)\
-    ((xs).len >= (xs).cap ?\
-        da__grow(&(xs), sizeof(*(xs).buf)),\
-            (xs).buf + (xs).len++ :\
-            (xs).buf + (xs).len++)
+#define array_item_size(arr) (sizeof(*(arr).v))
 
-#define da_clear(xs)\
-    da__clear((da__DynamicArray *)&(xs))
+void *array_grow(Arena *a, ArrayHeader *hdr, void *v,
+        S64 item_size, S64 item_len, B32 zero_mem);
 
-#define da_free(xs)\
-    da__free((da__DynamicArray *)&(xs))
+void array_shift(ArrayHeader *hdr, void *v,
+        S64 item_size, S64 by_items, S64 from_index);
 
-#define da_get(xs, i)\
-    (assert(da__is_in_bounds((xs), (i))), xs[i])
+#define array_len(arr)\
+    ((arr).len)
 
+#define array_first(arr)\
+    ((arr).v)
+
+#define array_last(arr)\
+    ((arr).v + (arr).len)
+
+#define array_next(arr, cur)\
+    ((cur)+1)
+
+#define array_push(arena, arr, val)\
+    (*((void **)&(arr).v) = array_grow((arena), array_header_get(arr),\
+                                     (arr).v, array_item_size(arr), 1, 0),\
+    (arr).v[(arr).len++] = (val))
+
+#define array_add(arena, arr, len)\
+    (*((void **)&(arr).v) = array_grow((arena), array_header_get(arr),\
+                                     (arr).v, array_item_size(arr), (len), 0)\
+    (arr).len += (len),\
+    &(arr).v[(arr).len - (len)])
+
+#define array_add_clear(arena, arr, len)\
+    (*((void **)&(arr).v) = array_grow((arena), array_header_get(arr),\
+                                     (arr).v, array_item_size(arr), (len), 1)\
+    (arr).len += (len),\
+    &(arr).v[(arr).len - (len)])
+
+#define array_reserve(arena, arr, len)\
+    (*((void **)&(arr).v) = array_grow((arena), array_header_get(arr),\
+                                     (arr).v, array_item_size(arr), (len), 1)\
+    &(arr).v[(arr).len])
+
+#define array_insert(arena, arr, idx, val)\
+    (array_add(arena, arr, 1),\
+     array_shift(array_header_get(arr), (arr).v, array_item_size(arr), 1, (idx)),\
+     (arr).v[(idx)] = (val))
+
+#define array_cut_ordered(arr, idx, len)\
+    (array_shift(array_header_get(arr), (arr).v, array_item_size(arr), (len), (idx)),\
+     &(arr).v[(idx)])
+
+#define array_remove_ordered(arr, idx)\
+    array_cut_ordered((arr), (idx), 1)
+
+#define array_remove(arr, idx)\
+    ((arr).v[(idx)] = (arr).v[--(arr).len])
+
+#define array_pop(arr)\
+    array_remove((arr), (arr).len-1)
+
+#define array_clear(arr)\
+    ((arr).len = 0)
 
 // "Char"/U08 stuf
 
