@@ -21,7 +21,6 @@ but do not be annoyed if I fully rewrite it myself.
     - [x] Dynamic Arrays
     - [ ] Hash Tables
     - [ ] Pools
-    - [ ] Linked Lists
     - [ ] Pools
     - [ ] Linked Lists
         - [ ] Stacks
