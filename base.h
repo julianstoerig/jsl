@@ -327,27 +327,6 @@ Str str_shift(int *argc, char ***argv);
 
 U64 str_hash(Str s);
 
-typedef struct {
-    U08 *buf;
-    S64  len;
-    S64  cap;
-    Arena *a;
-} StringBuilder;
-
-#ifndef NDEBUG
-    #define sb_check_invariants(s) sb__check_invariants(s)
-#else // NDEBUG
-    #define sb_check_invariants(s)
-#endif // NDEBUG
-
-// this function's return value is meaningless, but allows its use inside expresisons
-int sb__check_invariants(StringBuilder s);
-
-void sb_extend(StringBuilder *sb, Str s);
-void sb_extend_sb(StringBuilder *sb, StringBuilder s);
-void sb_extend_cstr(StringBuilder *sb, char *s);
-void sb_format(StringBuilder *sb, U08 *fmt, ...);
-
 // hash
 
 U64 xxh64(const void* key, S64 len, U64 h);
