@@ -1,4 +1,6 @@
 #include "base.h"
+#define STRETCHY_BUFFER_IMPL
+#include "stretchy_buffer.h"
 
 S64 fib(S64 n) {
     if (n < 0)

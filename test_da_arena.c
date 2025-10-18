@@ -9,7 +9,10 @@ typedef struct {
 
 
 int main(void) {
-    Array xs = {0};
+    Arena a = {0};
+    arena_init(&a, 5 * MiB);
+    Array xs = {.a=&a};
+
 
     for (int i=0; i<5; ++i)
         *da_push(xs) = i;

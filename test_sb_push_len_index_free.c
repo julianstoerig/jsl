@@ -1,4 +1,6 @@
 #include "base.h"
+#define STRETCHY_BUFFER_IMPL
+#include "stretchy_buffer.h"
 
 int main(void) {
     S64 *xs = 0;

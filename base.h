@@ -150,6 +150,25 @@ typedef   double         F64;
 typedef  float _Complex  C32; // TODO: sizeof(C32) == 64,  don't like it
 typedef  double _Complex C64; // TODO: sizeof(C64) == 128, don't like it
 
+extern S08 s08_min_val;
+extern S08 s08_max_val;
+extern S16 s16_min_val;
+extern S16 s16_max_val;
+extern S32 s32_min_val;
+extern S32 s32_max_val;
+extern S64 s64_min_val;
+extern S64 s64_max_val;
+
+extern U08 u08_min_val;
+extern U08 u08_max_val;
+extern U16 u16_min_val;
+extern U16 u16_max_val;
+extern U32 u32_min_val;
+extern U32 u32_max_val;
+extern U64 u64_min_val;
+extern U64 u64_max_val;
+
+
 function F32 f32_inf();
 
 function F32 f32_inf_neg();
@@ -182,6 +201,8 @@ struct Arena {
     Oom *oom;
 };
 
+#define ARENA__DEFAULT_SIZE (50 * MiB)
+
 typedef enum {
     ARENA_FLAG_DEFAULT = 0 << 0,
     ARENA_FLAG_NO_ZERO = 1 << 0,
@@ -193,6 +214,8 @@ void arena__default_oom(Arena *a);
 void arena__check_invariants(Arena *a);
 
 void arena_init(Arena *a, S64 size);
+
+Arena arena_create(S64 size);
 
 void arena_free(Arena *a);
 
@@ -206,33 +229,6 @@ void arena_reset(Arena *a);
 
 void *arena__alloc(Arena *a, S64 element_size, S64 element_count, S64 element_alignment, U08 flags);
 
-// Stretchy Buffer
-
-typedef struct {
-    S64 len;
-    S64 cap;
-    U08 buf[];
-} SbHeader;
-
-#define sb__header_get(sb) ((SbHeader *)((U08 *)sb - offsetof(SbHeader, buf)))
-#define sb__fits(sb, n) (sb_len(sb) + (n) <= sb_cap(sb))
-#define sb__fit(sb, n)\
-    (sb__fits((sb), (n)) ?\
-            0 :\
-            ((sb) = sb__grow((sb), sb_len(sb) + (n), sizeof(*(sb)))))
-
-#define sb_len(sb) ((sb) ? sb__header_get(sb)->len : 0)
-#define sb_cap(sb) ((sb) ? sb__header_get(sb)->cap : 0)
-#define sb_push(sb, e)\
-    (sb__fit((sb), 1),\
-     sb[sb_len(sb)] = (e),\
-     ++(sb__header_get(sb)->len))
-#define sb_reserve(sb, n) sb__fit((sb), (n)-sb__header_get(sb)->len)
-#define sb_clear(sb) sb__header_get(sb)->len = 0
-#define sb_free(sb) free((sb) ? sb__header_get(sb) : 0)
-
-void *sb__grow(void *sb, S64 new_len, S64 element_size);
-
 // Explicit Data Structures via Headers
 
 #define DA_DEFAULT_CAPACITY 16
@@ -242,16 +238,13 @@ struct da__DynamicArray {
     char    *buf;
     int64_t len;
     int64_t cap;
+    Arena *a;
 };
-
-#define __DYNAMIC_ARRAY_HEADER__(T)\
-    T *buf;\
-    S64 len;\
-    S64 cap;
 
 void da__clear(void *xs);
 void da__free(void *xs);
-void da__grow(void *xs, ptrdiff_t size);
+void da__grow(void *xs, S64 size);
+B32  da__is_in_bounds(void *xs, S64 i);
 
 #define da_push(xs)\
     ((xs).len >= (xs).cap ?\
@@ -264,6 +257,10 @@ void da__grow(void *xs, ptrdiff_t size);
 
 #define da_free(xs)\
     da__free((da__DynamicArray *)&(xs))
+
+#define da_get(xs, i)\
+    (assert(da__is_in_bounds((xs), (i))), xs[i])
+
 
 // "Char"/U08 stuf
 
@@ -282,14 +279,12 @@ B32 u08_isspace(U08 c);
 typedef struct {
     U08 *buf;
     S64  len;
-    S64  cap;
 } Str;
 
 #define STR_FMT\
     "%.*s"
 #define str_arg(s)\
     (int)(s).len, (char*)(s).buf
-
 #define str_dyn(buf)\
     str__from_parts((U08*)(buf), strlen((char*)(buf)))
 #define str_sta(buf)\
@@ -331,6 +326,27 @@ Str str_readfile(Str filename, Arena *a);
 Str str_shift(int *argc, char ***argv);
 
 U64 str_hash(Str s);
+
+typedef struct {
+    U08 *buf;
+    S64  len;
+    S64  cap;
+    Arena *a;
+} StringBuilder;
+
+#ifndef NDEBUG
+    #define sb_check_invariants(s) sb__check_invariants(s)
+#else // NDEBUG
+    #define sb_check_invariants(s)
+#endif // NDEBUG
+
+// this function's return value is meaningless, but allows its use inside expresisons
+int sb__check_invariants(StringBuilder s);
+
+void sb_extend(StringBuilder *sb, Str s);
+void sb_extend_sb(StringBuilder *sb, StringBuilder s);
+void sb_extend_cstr(StringBuilder *sb, char *s);
+void sb_format(StringBuilder *sb, U08 *fmt, ...);
 
 // hash
 

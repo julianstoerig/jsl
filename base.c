@@ -1,22 +1,22 @@
 #include "base.h"
 
-global S08 s08_min_val = (S08)0x80;
-global S08 s08_max_val = (S08)0x7f;
-global S16 s16_min_val = (S16)0x8000;
-global S16 s16_max_val = (S16)0x7fff;
-global S32 s32_min_val = (S32)0x80000000;
-global S32 s32_max_val = (S32)0x7fffffff;
-global S64 s64_min_val = (S64)0x8000000000000000;
-global S64 s64_max_val = (S64)0x7fffffffffffffff;
+S08 s08_min_val = (S08)0x80;
+S08 s08_max_val = (S08)0x7f;
+S16 s16_min_val = (S16)0x8000;
+S16 s16_max_val = (S16)0x7fff;
+S32 s32_min_val = (S32)0x80000000;
+S32 s32_max_val = (S32)0x7fffffff;
+S64 s64_min_val = (S64)0x8000000000000000;
+S64 s64_max_val = (S64)0x7fffffffffffffff;
 
-global U08 u08_min_val = 0;
-global U08 u08_max_val = 0xff;
-global U16 u16_min_val = 0;
-global U16 u16_max_val = 0xffff;
-global U32 u32_min_val = 0;
-global U32 u32_max_val = 0xffffffff;
-global U64 u64_min_val = 0;
-global U64 u64_max_val = 0xffffffffffffffff;
+U08 u08_min_val = 0;
+U08 u08_max_val = 0xff;
+U16 u16_min_val = 0;
+U16 u16_max_val = 0xffff;
+U32 u32_min_val = 0;
+U32 u32_max_val = 0xffffffff;
+U64 u64_min_val = 0;
+U64 u64_max_val = 0xffffffffffffffff;
 
 function F32 f32_inf(void) {
     union {F32 f; U32 i;} v;
@@ -70,6 +70,12 @@ void arena_init(Arena *a, S64 size) {
     a->oom = arena__default_oom;
 }
 
+Arena arena_create(S64 size) {
+    Arena a = {0};
+    arena_init(&a, size);
+    return(a);
+}
+
 void arena_free(Arena *a) {
     arena__check_invariants(a);
     free(a->buf);
@@ -85,6 +91,11 @@ void *arena__alloc(Arena *a, S64 element_size, S64 element_count, S64 element_al
     assert(0 <= element_count);
     assert(0 <  element_alignment);
     arena__check_invariants(a);
+
+    if (!a->buf) {
+        arena_init(a, ARENA__DEFAULT_SIZE);
+    }
+
     S64 total_size = ((U64)element_size * (U64)element_count);
     if (total_size < element_size || total_size < element_count)
         exit(1); // overflow bug //TODO
@@ -106,27 +117,6 @@ void *arena__alloc(Arena *a, S64 element_size, S64 element_count, S64 element_al
     return(p);
 }
 
-// Stretchy Buffer
-
-void *sb__grow(void *sb, S64 new_len, S64 element_size) {
-    S64 new_cap = max(1 + 2*sb_cap(sb), new_len);
-    assert(new_len <= new_cap);
-    S64 new_size = offsetof(SbHeader, buf) + new_cap*element_size;
-    SbHeader *new_sb = 0;
-    if (sb) {
-        S64 len = sb__header_get(sb)->len;
-        new_sb = realloc(sb__header_get(sb), new_size);
-        if (!new_sb) exit(1); // TODO: add customisable exit handling
-        new_sb->len = len;
-    } else {
-        new_sb = malloc(new_size);
-        if (!new_sb) exit(1); // TODO: add customisable exit handling
-        new_sb->len = 0;
-    }
-    new_sb->cap = new_cap;
-    return(new_sb->buf);
-}
-
 // Dynamic Array
 
 void da__check_invariants(da__DynamicArray *xs) {
@@ -139,13 +129,18 @@ void da__check_invariants(da__DynamicArray *xs) {
     assert(!arr.cap || arr.buf); // left implies right
 }
 
-void da__grow(void *xs, ptrdiff_t size) {
+void da__grow(void *xs, S64 size) {
     da__DynamicArray arr;
     memcpy(&arr, xs, sizeof(da__DynamicArray));
     da__check_invariants(&arr);
 
-    arr.cap = arr.cap ? arr.cap : 128;
-    void *p = malloc(2*size*arr.cap);
+    arr.cap = arr.cap ? 2*arr.cap : 128;
+    void *p = 0;
+    if (arr.a) {
+        p = arena__alloc(arr.a, size, arr.cap, size, ARENA_FLAG_DEFAULT);
+    } else {
+        p = malloc(size*arr.cap);
+    }
     if (arr.len)
         memcpy(p, arr.buf, size*arr.len);
     arr.buf = p;
@@ -170,6 +165,18 @@ void da__free(void *xs) {
     arr.cap = 0;
     arr.buf = 0;
     memcpy(xs, &arr, sizeof(arr));
+}
+
+B32 da__is_in_bounds(void *xs, S64 i) {
+    da__DynamicArray arr;
+    memcpy(&arr, xs, sizeof(da__DynamicArray));
+    da__check_invariants(xs);
+    B32 in_bounds = (0 <= i) & (i < arr.len);
+    if (in_bounds) {
+        return 1;
+    } else {
+        return 0;
+    }
 }
 
 // "Char"/U08 stuf
@@ -328,6 +335,8 @@ Str str_chop_right(Str s, S64 n) {
 }
 
 Str str_tok(Str s, Str seps, S64 *idx_state) {
+    str_check_invariants(s);
+    str_check_invariants(seps);
     Str w = {};
     S64 idx = *idx_state;
     if (idx < s.len) {
@@ -350,6 +359,7 @@ Str str_tok(Str s, Str seps, S64 *idx_state) {
 }
 
 Str str_readfile(Str filename, Arena *a) {
+    str_check_invariants(filename);
     Str s = {};
     FILE *f = 0;
     f = fopen(str_to_cstr(filename, a), "rb");
@@ -385,7 +395,86 @@ Str str_shift(int *argc, char ***argv) {
     s.len = strlen(**argv);
     --(*argc);
     ++(*argv);
+    str_check_invariants(s);
     return(s);
+}
+
+U64 str_hash(Str s) {
+    return(xxh64(s.buf, s.len, 0));
+}
+
+// String Builder
+
+int sb__check_invariants(StringBuilder s) {
+    if (s.buf) {
+        assert(s.len >= 0);
+        assert(s.cap >= 0);
+        assert(s.cap >= s.len);
+    } else {
+        assert(s.len == 0);
+        assert(s.cap == 0);
+    }
+    return(0);
+}
+
+void sb_extend(StringBuilder *sb, Str s) {
+    S64 combined_len = sb->len + s.len;
+    da__grow(sb, combined_len);
+    memcpy(sb->buf+sb->len, s.buf, s.len * sizeof(*s.buf));
+    sb->len += s.len;
+    assert(sb->len == combined_len);
+}
+
+void sb_extend_sb(StringBuilder *sb, StringBuilder s) {
+    S64 combined_len = sb->len + s.len;
+    da__grow(sb, combined_len);
+    memcpy(sb->buf+sb->len, s.buf, s.len * sizeof(*s.buf));
+    sb->len += s.len;
+    assert(sb->len == combined_len);
+}
+
+void sb_consume_sb(StringBuilder *sb, StringBuilder *s) {
+    sb_extend_sb(sb, *s);
+    da_free(s);
+}
+
+void sb_extend_cstr(StringBuilder *sb, char *s) {
+    S64 s_len = strlen(s);
+    S64 combined_len = sb->len + s_len;
+    da__grow(sb, combined_len);
+    memcpy(sb->buf+sb->len, s, s_len * sizeof(*s));
+    sb->len += s_len;
+    assert(sb->len == combined_len);
+}
+
+void sb_consume_cstr(StringBuilder *sb, char *s) {
+    sb_extend_cstr(sb, s);
+    free(s);
+}
+
+void sb_format(StringBuilder *sb, U08 *fmt, ...) {
+    sb_check_invariants(*sb);
+    S64 n = 0;
+    S64 size = 0;
+    U08 *p = 0;
+    va_list ap;
+
+    va_start(ap, fmt);
+    n = vsnprintf(p, size, fmt, ap);
+    va_end(ap);
+    if (n < 0) return;
+
+    da__grow(sb, sb->len + n);
+    size = n + 1;
+    p = sb->buf + sb->len;
+    if (!p) return;
+
+    va_start(ap, fmt);
+    n = vsnprintf(p, size, fmt, ap);
+    va_end(ap);
+    if (n < 0) return;
+
+    sb->len += n;
 }
 
 // hash
