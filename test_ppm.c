@@ -1,12 +1,6 @@
 #include "base.h"
-
-typedef struct Array Array;
-struct Array {
-    U08 *buf;
-    S64  len;
-    S64  cap;
-    Arena *a;
-};
+#define STRETCHY_BUFFER_IMPL
+#include "stretchy_buffer.h"
 
 
 typedef enum PPMFormat PPMFormat;
@@ -104,7 +98,7 @@ cleanup:
 int main(void) {
     Str fname = str_dyn("test_ppm.ppm");
 
-    Array xs = {0};
+    U08 *xs = {0};
 
     S64 rows = 720;
     S64 cols = 480;
@@ -112,9 +106,9 @@ int main(void) {
     S64 max_val = 255;
 
     for (S64 i=0; i<rows*cols*channels; ++i) {
-        *da_push(xs) = i % max_val;
+        sb_push(xs, i % max_val);
     }
 
-    PPMImage img = ppm_create(xs.buf, rows, cols, max_val, PPM_FORMAT_PPM_RAW);
+    PPMImage img = ppm_create(xs, rows, cols, max_val, PPM_FORMAT_PPM_RAW);
     ppm_write(img, fname);
 }
