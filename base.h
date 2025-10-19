@@ -348,7 +348,7 @@ void array_shift(ArrayHeader *hdr, void *v,
 #define dll_pushback_np(first, last, node, next, prev)\
     ((first) == 0 ?\
     ((first) = (last) = (node), (node)->next = (node)->prev = 0) :\
-    ((last)->next = (node), (node)->prev = (last).(last) = (node), (node)->next = 0))
+    ((last)->next = (node), (node)->prev = (last), (last) = (node), (node)->next = 0))
 
 #define dll_pushback(first, last, node)\
     dll_pushback_np(first, last, node, next, prev)
