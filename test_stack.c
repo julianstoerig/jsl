@@ -8,6 +8,7 @@ struct Stack {
 };
 
 int main(void) {
+    int ret = 0;
     Arena a = arena_create(MiB);
 
     Stack *node = 0;
@@ -22,16 +23,25 @@ int main(void) {
     node->val = 2;
     stack_push(top, node);
 
-    if (top->val != 2)
+    if (top->val != 2) {
+        ret = 1;
         goto cleanup;
+    }
     stack_pop(top);
-    if (top->val != 1)
+
+    if (top->val != 1) {
+        ret = 1;
         goto cleanup;
+    }
     stack_pop(top);
-    if (top->val != 0)
+
+    if (top->val != 0) {
+        ret = 1;
         goto cleanup;
+    }
+    stack_pop(top);
 
 cleanup:
     arena_free(&a);
-    return(0);
+    return(ret);
 }
