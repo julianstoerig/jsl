@@ -39,3 +39,9 @@ add_test(NAME test_ppm COMMAND test_ppm)
 
 add_executable(test_stack test_stack.c)
 add_test(NAME test_stack COMMAND test_stack)
+
+add_executable(test_queue test_queue.c)
+add_test(NAME test_queue COMMAND test_queue)
+
+add_executable(test_dll test_dll.c)
+add_test(NAME test_dll COMMAND test_dll)
