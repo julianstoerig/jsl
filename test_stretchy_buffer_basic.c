@@ -1,3 +1,4 @@
+#define BASE_IMPL
 #include "base.h"
 #define STRETCHY_BUFFER_IMPL
 #include "stretchy_buffer.h"

@@ -1,3 +1,4 @@
+#define BASE_IMPL
 #include "base.h"
 
 void test(U64 from, U64 to, U64 prime) {

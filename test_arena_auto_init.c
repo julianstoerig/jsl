@@ -1,3 +1,4 @@
+#define BASE_IMPL
 #include "base.h"
 
 
