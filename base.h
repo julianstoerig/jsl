@@ -187,7 +187,7 @@ function F64 f64_inf_neg();
 #elif JSL_STD_C17 || JSL_STD_C11
     #define alignof(T) (S64)_Alignof(T)
 #else
-    #define alignof(T) (S64)(sizeof(T) > sizeof(uintptr_t) ? sizeof(uintptr_t) : sizeof(T))
+    #define alignof(T) sizeof(T)
 #endif // JSL_STD
 
 #define KiB (1024LL)
