@@ -168,6 +168,8 @@ extern U32 u32_max_val;
 extern U64 u64_min_val;
 extern U64 u64_max_val;
 
+#define PI  3.1415926535897932385
+#define TAU 6.283185307179586477
 
 function F32 f32_inf();
 
