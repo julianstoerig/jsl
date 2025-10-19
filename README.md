@@ -22,8 +22,8 @@ but do not be annoyed if I fully rewrite it myself.
     - [ ] Hash Tables
     - [ ] Pools
     - [ ] Pools
-    - [ ] Linked Lists
-        - [ ] Stacks
-        - [ ] Queues
-        - [ ] Doubly Linked Lists
+    - [x] Linked Lists
+        - [x] Stacks
+        - [x] Queues
+        - [x] Doubly Linked Lists
 - [ ] Unicode (UTF-8) Aware Strings
