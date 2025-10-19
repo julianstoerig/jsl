@@ -329,7 +329,7 @@ void array_shift(ArrayHeader *hdr, void *v,
 
 #define queue_push_n(first, last, node, next)\
     ((first) == 0 ?\
-     ((first) = (last) = (node), (node)->next = null) :\
+     ((first) = (last) = (node), (node)->next = 0) :\
      ((last)->next = (node), (last) = (node), (node)->next = 0))
 
 #define queue_push(first, last, node)\
