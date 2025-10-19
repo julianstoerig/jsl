@@ -223,7 +223,7 @@ void arena_reset(Arena *a);
 
 #define make(...) makex(__VA_ARGS__, make4, make3, make2) (__VA_ARGS__)
 #define makex(a, b, c, d, e, ...) e
-#define make2(a, T)       (T*)arena__alloc((a), sizeof(T), (0), alignof(T), ARENA_FLAG_DEFAULT)
+#define make2(a, T)       (T*)arena__alloc((a), sizeof(T), (1), alignof(T), ARENA_FLAG_DEFAULT)
 #define make3(a, T, n)    (T*)arena__alloc((a), sizeof(T), (n), alignof(T), ARENA_FLAG_DEFAULT)
 #define make4(a, T, n, f) (T*)arena__alloc((a), sizeof(T), (n), alignof(T), (f))
 
