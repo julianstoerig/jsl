@@ -318,7 +318,6 @@ void array_shift(ArrayHeader *hdr, void *v,
 #define stack_push(first, node)\
     stack_push_n(first, node, next)
 
-// TODO: check if next can be wrapped here
 #define stack_pop_n(first, next)\
     ((first) = (first)->next)
 
