@@ -132,10 +132,6 @@
 #define clamp_bot(x, a) max(x, a)
 #define clamp(x, a, b)  clamp_top(b, clamp_bot(a, x))
 
-#define global   static
-#define persist  static
-#define function static
-
 typedef   int8_t         S08;
 typedef  int16_t         S16;
 typedef  int32_t         S32;
@@ -169,16 +165,16 @@ extern U32 u32_max_val;
 extern U64 u64_min_val;
 extern U64 u64_max_val;
 
-#define PI  3.1415926535897932385
-#define TAU 6.283185307179586477
+extern F64 pi;
+extern F64 tau;
 
-function F32 f32_inf();
+F32 f32_inf();
 
-function F32 f32_inf_neg();
+F32 f32_inf_neg();
 
-function F64 f64_inf();
+F64 f64_inf();
 
-function F64 f64_inf_neg();
+F64 f64_inf_neg();
 
 #define sizeof(T) (S64)sizeof(T)
 #define countof(A) sizeof(A)/sizeof(*A)
@@ -502,25 +498,29 @@ U32 u32_max_val = 0xffffffff;
 U64 u64_min_val = 0;
 U64 u64_max_val = 0xffffffffffffffff;
 
-function F32 f32_inf(void) {
+F64 pi = 3.1415926535897932385;
+F64 tau = 6.283185307179586477;
+
+
+F32 f32_inf(void) {
     union {F32 f; U32 i;} v;
     v.i = 0x7f800000UL;
     return(v.f);
 }
 
-function F32 f32_inf_neg(void) {
+F32 f32_inf_neg(void) {
     union {F32 f; U32 i;} v;
     v.i = 0xff800000UL;
     return(v.f);
 }
 
-function F64 f64_inf(void) {
+F64 f64_inf(void) {
     union {F64 f; U64 i;} v;
     v.i = 0x7ff0000000000000UL;
     return(v.f);
 }
 
-function F64 f64_inf_neg(void) {
+F64 f64_inf_neg(void) {
     union {F64 f; U64 i;} v;
     v.i = 0xfff0000000000000UL;
     return(v.f);
