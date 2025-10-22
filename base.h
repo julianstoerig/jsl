@@ -168,17 +168,17 @@ extern U64 u64_max_val;
 extern F64 pi;
 extern F64 tau;
 
-F32 f32_inf();
+F32 f32_inf(void);
 
-F32 f32_inf_neg();
+F32 f32_inf_neg(void);
 
-F32 f32_machine_eps();
+F32 f32_machine_eps(void);
 
-F64 f64_inf();
+F64 f64_inf(void);
 
-F64 f64_inf_neg();
+F64 f64_inf_neg(void);
 
-F64 f64_machine_eps();
+F64 f64_machine_eps(void);
 
 #define sizeof(T) (S64)sizeof(T)
 #define countof(A) sizeof(A)/sizeof(*A)
