@@ -5,10 +5,10 @@
 typedef struct {
     int64_t len;
     int64_t cap;
-    char buf[];
+    char v[];
 } SbHeader;
 
-#define sb__header_get(sb) ((SbHeader *)((char *)sb - offsetof(SbHeader, buf)))
+#define sb__header_get(sb) ((SbHeader *)((char *)sb - offsetof(SbHeader, v)))
 #define sb__fits(sb, n) (sb_len(sb) + (n) <= sb_cap(sb))
 #define sb__fit(sb, n)\
     (sb__fits((sb), (n)) ?\
@@ -34,7 +34,7 @@ void *sb__grow(void *sb, int64_t new_len, int64_t element_size);
 void *sb__grow(void *sb, int64_t new_len, int64_t element_size) {
     int64_t new_cap = max(1 + 2*sb_cap(sb), new_len);
     assert(new_len <= new_cap);
-    int64_t new_size = offsetof(SbHeader, buf) + new_cap*element_size;
+    int64_t new_size = offsetof(SbHeader, v) + new_cap*element_size;
     SbHeader *new_sb = 0;
     if (sb) {
         int64_t len = sb__header_get(sb)->len;
@@ -47,7 +47,7 @@ void *sb__grow(void *sb, int64_t new_len, int64_t element_size) {
         new_sb->len = 0;
     }
     new_sb->cap = new_cap;
-    return(new_sb->buf);
+    return(new_sb->v);
 }
 
 #endif // STRETCHY_BUFFER_IMPL
