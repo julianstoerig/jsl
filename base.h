@@ -194,7 +194,7 @@ F64 f64_inf_neg();
 typedef struct Arena Arena;
 typedef void (Oom)(Arena *a);
 struct Arena {
-    U08 *buf;
+    U08 *v;
     S64  len;
     S64  cap;
     Oom *oom;
@@ -408,20 +408,20 @@ B32 u08_isspace(U08 c);
 // Strings
 
 typedef struct {
-    U08 *buf;
+    U08 *v;
     S64  len;
 } Str;
 
 #define STR_FMT\
     "%.*s"
 #define str_arg(s)\
-    (int)(s).len, (char*)(s).buf
-#define str_dyn(buf)\
-    str__from_parts((U08*)(buf), strlen((char*)(buf)))
-#define str_sta(buf)\
-    Str{(U08*)(buf), strlen((char*)(buf))}
-#define str_from_parts(buf, len)\
-    str__from_parts((U08*)(buf), (S64)(len))
+    (int)(s).len, (char*)(s).v
+#define str_dyn(v)\
+    str__from_parts((U08*)(v), strlen((char*)(v)))
+#define str_sta(v)\
+    Str{(U08*)(v), strlen((char*)(v))}
+#define str_from_parts(v, len)\
+    str__from_parts((U08*)(v), (S64)(len))
 
 #ifndef NDEBUG
     #define str_check_invariants(s) str__check_invariants(s)
@@ -432,7 +432,7 @@ typedef struct {
 // this function's return value is meaningless, but allows its use inside expresisons
 int str__check_invariants(Str s);
 
-Str str__from_parts(U08 *buf, S64 len);
+Str str__from_parts(U08 *v, S64 len);
 
 Str str_dup(Str s1, Arena *a);
 
@@ -535,7 +535,7 @@ void arena__default_oom(Arena *a) {
 void arena__check_invariants(Arena *a) {
     if (!a)
         return;
-    if (!a->buf) {
+    if (!a->v) {
         assert(!a->len);
         assert(!a->cap);
         return;
@@ -546,9 +546,9 @@ void arena__check_invariants(Arena *a) {
 }
 
 void arena_init(Arena *a, S64 size) {
-    assert(!a->buf);
+    assert(!a->v);
     arena__check_invariants(a);
-    a->buf = (U08*)malloc(size);
+    a->v = (U08*)malloc(size);
     a->len = 0;
     a->cap = size;
     a->oom = arena__default_oom;
@@ -562,7 +562,7 @@ Arena arena_create(S64 size) {
 
 void arena_free(Arena *a) {
     arena__check_invariants(a);
-    free(a->buf);
+    free(a->v);
 }
 
 void arena_reset(Arena *a) {
@@ -576,7 +576,7 @@ void *arena__alloc(Arena *a, S64 element_size, S64 element_count, S64 element_al
     assert(0 <  element_alignment);
     arena__check_invariants(a);
 
-    if (!a->buf) {
+    if (!a->v) {
         arena_init(a, ARENA__DEFAULT_SIZE);
     }
 
@@ -584,7 +584,7 @@ void *arena__alloc(Arena *a, S64 element_size, S64 element_count, S64 element_al
     if (total_size < element_size || total_size < element_count)
         exit(1); // overflow bug //TODO
 
-    S64 padding = u64_from_ptr(a->buf) & ((U64)element_alignment-1);
+    S64 padding = u64_from_ptr(a->v) & ((U64)element_alignment-1);
     S64 available = a->cap - a->len - padding;
 
     if (available < 0) {
@@ -594,7 +594,7 @@ void *arena__alloc(Arena *a, S64 element_size, S64 element_count, S64 element_al
             a->oom(a);
         }
     }
-    void *p = (void*)(a->buf + a->len + padding);
+    void *p = (void*)(a->v + a->len + padding);
     a->len += padding + total_size;
     if (!(flags & ARENA_FLAG_NO_ZERO))
         memzero_bytes(p, total_size);
@@ -680,7 +680,7 @@ B32 u08_isspace(U08 c) {
 
 // this function's return value is meaningless, but allows its use inside expresisons
 int str__check_invariants(Str s) {
-    if (s.buf) {
+    if (s.v) {
         assert(s.len >= 0);
     } else {
         assert(s.len == 0);
@@ -688,9 +688,9 @@ int str__check_invariants(Str s) {
     return(0);
 }
 
-Str str__from_parts(U08 *buf, S64 len) {
+Str str__from_parts(U08 *v, S64 len) {
     Str s = {};
-    s.buf = buf;
+    s.v = v;
     s.len = len;
     str_check_invariants(s);
     return(s);
@@ -699,11 +699,11 @@ Str str__from_parts(U08 *buf, S64 len) {
 Str str_dup(Str s1, Arena *a) {
     str_check_invariants(s1);
     Str s2 = {};
-    s2.buf = make(a, U08, s1.len);
-    if (!s2.buf)
+    s2.v = make(a, U08, s1.len);
+    if (!s2.v)
         goto defer;
     s2.len = s1.len;
-    memcpy(s2.buf, s1.buf, s2.len);
+    memcpy(s2.v, s1.v, s2.len);
 defer:
     str_check_invariants(s2);
     return(s2);
@@ -715,7 +715,7 @@ char *str_to_cstr(Str s, Arena *a) {
     if (!s.len)
         goto defer;
     cstr = make(a, char, s.len+1);
-    memcpy(cstr, s.buf, s.len);
+    memcpy(cstr, s.v, s.len);
     cstr[s.len] = '\0';
 defer:
     return(cstr);
@@ -750,7 +750,7 @@ Str str_format(Str fmt_str, Arena *a, ...) {
     if (n < 0)
         return(s);
 
-    s.buf = (U08*)p;
+    s.v = (U08*)p;
     s.len = n;
 
     return(s);
@@ -761,20 +761,20 @@ B32 str_equal(Str a, Str b) {
     str_check_invariants(b);
     if (a.len != b.len)
         return 0;
-    return(a.len || memcmp(a.buf, b.buf, a.len));
+    return(a.len || memcmp(a.v, b.v, a.len));
 }
 
 U08 str_get_char_at(Str s, S64 i) {
     str_check_invariants(s);
     if (i < 0) i = 0;
     if (i > s.len) i = s.len;
-    return(s.buf[i]);
+    return(s.v[i]);
 }
 
 S64 str_index_of(Str s, U08 c) {
     str_check_invariants(s);
     for (S64 i=0; i<s.len; ++i)
-        if (s.buf[i] == c)
+        if (s.v[i] == c)
             return(i);
     return(-1);
 }
@@ -783,7 +783,7 @@ Str str_chop_left(Str s, S64 n) {
     str_check_invariants(s);
     Str a = {};
     S64 min_len = n < s.len ? n : s.len;
-    a.buf = s.buf + min_len;
+    a.v = s.v + min_len;
     a.len = s.len - min_len;
     return(a);
 }
@@ -792,7 +792,7 @@ Str str_chop_right(Str s, S64 n) {
     str_check_invariants(s);
     Str a = {};
     S64 min_len = n < s.len ? n : s.len;
-    a.buf = s.buf;
+    a.v = s.v;
     a.len = s.len - min_len;
     return(a);
 }
@@ -803,11 +803,11 @@ Str str_tok(Str s, Str seps, S64 *idx_state) {
     Str w = {};
     S64 idx = *idx_state;
     if (idx < s.len) {
-        w.buf = s.buf + idx;
+        w.v = s.v + idx;
         B32 running = 1;
         while (running) {
             for (S64 i=0; i<seps.len; ++i) {
-                if (seps.buf[i] == s.buf[idx]) {
+                if (seps.v[i] == s.v[idx]) {
                     running = 0;
                 }
             }
@@ -835,12 +835,12 @@ Str str_readfile(Str filename, Arena *a) {
         fclose(f);
     }
     fseek(f, 0, SEEK_SET);
-    s.buf = make(a, U08, s.len);
-    if (!s.buf) {
+    s.v = make(a, U08, s.len);
+    if (!s.v) {
         return(s);
         fclose(f);
     }
-    S64 bytes_read = fread(s.buf, 1, s.len, f);
+    S64 bytes_read = fread(s.v, 1, s.len, f);
     if (bytes_read != s.len) {
         s.len = bytes_read < s.len ? bytes_read : s.len;
         fclose(f);
@@ -854,7 +854,7 @@ Str str_shift(int *argc, char ***argv) {
     Str s = {};
     if (!argc || !*argv)
         return(s);
-    s.buf = **(U08***)argv;
+    s.v = **(U08***)argv;
     s.len = strlen(**argv);
     --(*argc);
     ++(*argv);
@@ -863,7 +863,7 @@ Str str_shift(int *argc, char ***argv) {
 }
 
 U64 str_hash(Str s) {
-    return(xxh64(s.buf, s.len, 0));
+    return(xxh64(s.v, s.len, 0));
 }
 
 // hash
