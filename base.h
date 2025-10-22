@@ -172,9 +172,13 @@ F32 f32_inf();
 
 F32 f32_inf_neg();
 
+F32 f32_machine_eps();
+
 F64 f64_inf();
 
 F64 f64_inf_neg();
+
+F64 f64_machine_eps();
 
 #define sizeof(T) (S64)sizeof(T)
 #define countof(A) sizeof(A)/sizeof(*A)
@@ -524,6 +528,28 @@ F64 f64_inf_neg(void) {
     union {F64 f; U64 i;} v;
     v.i = 0xfff0000000000000UL;
     return(v.f);
+}
+
+F32 f32_machine_eps(void) {
+    union {
+        U32 i;
+        F32 f;
+    } x, y;
+    x.i = 0x3F800001;
+    y.i = 0x3F800000;
+    F32 eps = x.f - y.f;
+    return(eps);
+}
+
+F64 f64_machine_eps(void) {
+    union {
+        U64 i;
+        F64 f;
+    } x, y;
+    x.i = 0x3ff0000000000001ULL;
+    y.i = 0x3ff0000000000000ULL;
+    F64 eps = x.f - y.f;
+    return(eps);
 }
 
 void arena__default_oom(Arena *a) {
