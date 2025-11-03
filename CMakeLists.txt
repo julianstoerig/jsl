@@ -11,6 +11,9 @@ set(CTEST_CMAKE_GENERATOR Ninja)
 set(CTEST_CONFIGURATION_TYPE Debug)
 set(CTEST_MEMORYCHECK_TYPE AddressSanitizer)
 
+add_subdirectory(num
+)
+
 enable_testing()
 
 add_executable(test_trivial test_trivial.c)
