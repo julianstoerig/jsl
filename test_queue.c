@@ -9,19 +9,18 @@ struct Queue {
 
 int main(void) {
     int ret = 0;
-    Arena a = arena_create(MiB);
-    Arena *ap = &a;
+    Arena *a = arena_create(MiB);
 
     Queue *first = 0, *last = 0, *node = 0;
-    node = make(ap, Queue);
+    node = make(a, Queue);
     node->val = 0;
     queue_push(first, last, node);
 
-    node = make(ap, Queue);
+    node = make(a, Queue);
     node->val = 1;
     queue_push(first, last, node);
 
-    node = make(ap, Queue);
+    node = make(a, Queue);
     node->val = 2;
     queue_push(first, last, node);
 
@@ -44,6 +43,6 @@ int main(void) {
     queue_pop(first, last);
 
 cleanup:
-    arena_free(ap);
+    arena_free(a);
     return(ret);
 }

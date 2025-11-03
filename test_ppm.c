@@ -16,14 +16,14 @@ enum PPMFormat {
 
 typedef struct PPMImage PPMImage;
 struct PPMImage {
-    U08 *buf;
+    U08 *v;
     S32 rows;
     S32 cols;
     S32 max_val;
     U08 format;
 };
 
-PPMImage ppm_create(U08 *buf, S64 rows, S64 cols, S64 max_val, PPMFormat format) {
+PPMImage ppm_create(U08 *v, S64 rows, S64 cols, S64 max_val, PPMFormat format) {
     assert(rows >= 0);
     assert(rows <= s32_max_val);
     assert(cols >= 0);
@@ -32,7 +32,7 @@ PPMImage ppm_create(U08 *buf, S64 rows, S64 cols, S64 max_val, PPMFormat format)
     assert(max_val <= (1<<16));
 
     PPMImage img = {
-        .buf = buf,
+        .v = v,
         .rows = rows,
         .cols = rows,
         .max_val = max_val,
@@ -65,11 +65,11 @@ void ppm_write(PPMImage img, Str fname) {
             is_ascii   = 0;
     }
     S64 bufsize_bytes = img.cols * img.rows * n_channels;
-    S64 arena_size = 128 + sizeof(*fname.buf)*fname.len;
+    S64 arena_size = 128 + sizeof(*fname.v)*fname.len;
     if (is_ascii) arena_size += 2 * bufsize_bytes;
 
-    Arena a = arena_create(arena_size);
-    FILE *f = fopen(str_to_cstr(fname, &a), "wb");
+    Arena *a = arena_create(arena_size);
+    FILE *f = fopen(str_to_cstr(fname, a), "wb");
     if (!f) goto cleanup;
 
     char *header_fmt =  "P%d\n"
@@ -84,12 +84,12 @@ void ppm_write(PPMImage img, Str fname) {
     if (n+5 < strlen(header)) goto cleanup;
 
     if (is_ascii) {
-        U08 *buf_ascii = make(&a, U08, bufsize_bytes);
+        U08 *buf_ascii = make(a, U08, bufsize_bytes);
         for (S64 i=0; i<bufsize_bytes; ++i) {
             buf_ascii[i];
         }
     } else {
-        fwrite(img.buf, sizeof(*img.buf), bufsize_bytes, f);
+        fwrite(img.v, sizeof(*img.v), bufsize_bytes, f);
     }
 
 cleanup:

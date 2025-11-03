@@ -9,24 +9,23 @@ struct DLL {
 
 int main(void) {
     int ret = 0;
-    Arena a = arena_create(MiB);
-    Arena *ap = &a;
+    Arena *a = arena_create(MiB);
 
     DLL *first = 0, *last = 0, *node = 0;
 
-    node = make(ap, DLL);
+    node = make(a, DLL);
     node->val = 0;
     dll_pushback(first, last, node);
 
-    node = make(ap, DLL);
+    node = make(a, DLL);
     node->val = 1;
     dll_pushback(first, last, node);
 
-    node = make(ap, DLL);
+    node = make(a, DLL);
     node->val = 2;
     dll_pushback(first, last, node);
 
-    node = make(ap, DLL);
+    node = make(a, DLL);
     node->val = 3;
     dll_pushback(first, last, node);
 
@@ -52,7 +51,7 @@ int main(void) {
         goto cleanup;
     }
 
-    node = make(ap, DLL);
+    node = make(a, DLL);
     node->val = 3;
     dll_insert_after(first, last, first, node);
     if (first->next->val != 3) {
@@ -60,7 +59,7 @@ int main(void) {
         goto cleanup;
     }
 
-    node = make(ap, DLL);
+    node = make(a, DLL);
     node->val = 4;
     dll_insert_before(first, last, last, node);
     if (last->prev->val != 4) {
@@ -69,6 +68,6 @@ int main(void) {
     }
 
 cleanup:
-    arena_free(ap);
+    arena_free(a);
     return(ret);
 }

@@ -218,7 +218,7 @@ void arena__check_invariants(Arena *a);
 
 void arena_init(Arena *a, S64 size);
 
-Arena arena_create(S64 size);
+Arena *arena_create(S64 size);
 
 void arena_free(Arena *a);
 
@@ -580,10 +580,12 @@ void arena_init(Arena *a, S64 size) {
     a->oom = arena__default_oom;
 }
 
-Arena arena_create(S64 size) {
+Arena *arena_create(S64 size) {
     Arena a = {0};
-    arena_init(&a, size);
-    return(a);
+    arena_init(&a, size + sizeof(Arena));
+    Arena *ap = make(&a, Arena);
+    memcpy(ap, &a, sizeof(Arena));
+    return ap;
 }
 
 void arena_free(Arena *a) {
@@ -612,6 +614,11 @@ void *arena__alloc(Arena *a, S64 element_size, S64 element_count, S64 element_al
 
     S64 padding = u64_from_ptr(a->v) & ((U64)element_alignment-1);
     S64 available = a->cap - a->len - padding;
+
+    if (total_size > available) {
+        assert(0);
+        abort();
+    }
 
     if (available < 0) {
         if (flags & ARENA_FLAG_NO_OOM) {

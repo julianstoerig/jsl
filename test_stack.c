@@ -9,17 +9,17 @@ struct Stack {
 
 int main(void) {
     int ret = 0;
-    Arena a = arena_create(MiB);
+    Arena *a = arena_create(MiB);
 
     Stack *node = 0;
-    Stack *top = make(&a, Stack, 1);
+    Stack *top = make(a, Stack, 1);
     top->val = 0;
 
-    node = make(&a, Stack);
+    node = make(a, Stack);
     node->val = 1;
     stack_push(top, node);
 
-    node = make(&a, Stack);
+    node = make(a, Stack);
     node->val = 2;
     stack_push(top, node);
 
@@ -42,6 +42,6 @@ int main(void) {
     stack_pop(top);
 
 cleanup:
-    arena_free(&a);
+    arena_free(a);
     return(ret);
 }
