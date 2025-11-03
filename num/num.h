@@ -45,7 +45,7 @@ B32 mat_equal(Mat lhs, Mat rhs, F64 eps_abs, F64 eps_rel);
 #define vec_col_empty(len, ap) mat_empty((len), 1, (ap))
 Mat mat_empty(S64 rows, S64 cols, Arena *ap);
 
-#define vec(a, ...) vec_col((ap), __VA_ARGS__)
+#define vec(ap, ...) vec_col((ap), __VA_ARGS__)
 #define vec_row(ap, ...)\
     vec_row_from_array(sizeof(((F64[]){__VA_ARGS__})) / sizeof(((F64[]){__VA_ARGS__}[0])), ((F64[]){__VA_ARGS__}), (ap))
 #define vec_col(ap, ...)\
