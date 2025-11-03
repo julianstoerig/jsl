@@ -16,6 +16,9 @@ enable_testing()
 add_executable(test_trivial test_trivial.c)
 add_test(NAME test_trivial COMMAND test_trivial)
 
+add_executable(test_machine_eps test_machine_eps.c)
+add_test(NAME test_machine_eps COMMAND test_machine_eps)
+
 add_executable(test_stretchy_buffer_basic test_stretchy_buffer_basic.c)
 add_test(NAME test_stretchy_buffer_basic COMMAND test_stretchy_buffer_basic)
 
