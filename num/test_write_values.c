@@ -5,13 +5,12 @@ F64 f(F64 x) {
 }
 
 int main(void) {
-    Arena a = arena_create(MiB);
-    Arena *ap = &a;
+    Arena *a = arena_create(MiB);
 
     F64 *x = 0;
     F64 *y = 0;
     S64 n = 101;
-    eval_f_on_range(f, &x, &y, 1e-9, 2, n, ap);
+    eval_f_on_range(f, &x, &y, 1e-9, 2, n, a);
     FILE *f = fopen("test.dat", "wb");
     if (!f)
         return(1);
