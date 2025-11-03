@@ -26,3 +26,25 @@ but do not be annoyed if I fully rewrite it myself.
         - [x] Queues
         - [x] Doubly Linked Lists
 - [ ] Unicode (UTF-8) Aware Strings
+- [ ] Numerics
+    - [ ] Scalar
+        - [x] Newton
+        - [x] Bisection
+        - [x] Secant
+        - [x] Secant-Bisection
+        - [x] Fixpoint
+    - [ ] Linear Algebra
+        - [x] Vector
+        - [x] Matrix
+        - [x] Transposition
+        - [x] Matrix Multiplication
+        - [ ] QR Decomposition
+        - [ ] LR Decomposition
+        - [ ] Cholesky Decomposition
+        - [ ] Gauss-Seidel
+        - [ ] Matrix versions of fixpoint and rootfinding algorithms
+        - [ ] Newton
+        - [ ] Bisection
+        - [ ] Secant
+        - [ ] Secant-Bisection
+        - [ ] Fixpoint
