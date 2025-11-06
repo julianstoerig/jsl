@@ -46,3 +46,7 @@ target_link_libraries(test_write_values m)
 add_executable(test_matrix num.c test_matrix.c)
 add_test(NAME test_matrix COMMAND test_matrix)
 target_link_libraries(test_matrix m)
+
+add_executable(test_integration num.c test_integration.c)
+add_test(NAME test_integration COMMAND test_integration)
+target_link_libraries(test_integration m)

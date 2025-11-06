@@ -126,5 +126,12 @@ int main(void) {
     mat_fprint(stdout, P);
     mat_fprint(stdout, P, 9);
 
+    Mat rsm = mat(a, 1, 3,
+        1, 2, 3,
+    );
+    if (!isclose(at2(rsm, 0, 2), 3, 1e-3, 0)) return 1;
+    Mat rsm2 = mat_reshape(rsm, 3, 1, a);
+    if (!isclose(at2(rsm2, 2, 0), 3, 1e-3, 0)) return 1;
+
     arena_free(a);
 }
