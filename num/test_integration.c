@@ -41,6 +41,23 @@ F64 int_imp_riemann_l(Mat y, F64 dx) {
     return res;
 }
 
+F64 int_exp_trapezoid(F64 f(F64), F64 dx, F64 xmin, F64 xmax) {
+    F64 res = 0;
+    for (F64 x=xmin; x<xmax-dx; x+=dx) {
+        res += (f(x)+f(x+dx))/2 * dx;
+    }
+    return res;
+}
+
+F64 int_imp_trapezoid(Mat y, F64 dx) {
+    F64 res = 0;
+    S64 y_len = mat_count(y);
+    for (S64 i=0; i<y_len-1; i+=1) {
+        res += (at1(y, i) + at1(y, i+1)) / 2 * dx;
+    }
+    return res;
+}
+
 F64 f0(F64 x) {
     return 1;
 }
@@ -62,6 +79,8 @@ F64 f4(F64 x) {
 }
 
 int main(void) {
+    Arena *a = arena_create(10 * MiB);
+
     if (
         !isclose(int_exp_riemann_l(f0, 1e-3, 0, 2), 2, 1e-9, 0) ||
         !isclose(int_exp_riemann_r(f0, 1e-3, 0, 2), 2, 1e-9, 0) ||
@@ -76,7 +95,6 @@ int main(void) {
     0)
         return 1;
 
-    Arena *a = arena_create(10 * MiB);
     Mat y = vec(a, 1, 1, 1, 1);
     F64 dx = 1;
     if (!isclose(int_imp_riemann_l(y, dx), vec_len(y)-1, 1e-9, 0))
@@ -85,5 +103,31 @@ int main(void) {
     dx = 4.0 / n;
     y = vec_linspace(0, 4, n, a);
     if (!isclose(int_imp_riemann_l(y, dx), 8, 1e-3, 0))
+        return 1;
+
+
+
+    if (
+        !isclose(int_exp_trapezoid(f0, 1e-3, 0, 2), 2, 1e-9, 0) ||
+        !isclose(int_exp_trapezoid(f0, 1e-3, 0, 2), 2, 1e-9, 0) ||
+        !isclose(int_exp_trapezoid(f1, 4e-4, 0, 4), 8, 1e-3, 0) ||
+        !isclose(int_exp_trapezoid(f1, 4e-4, 0, 4), 8, 1e-3, 0) ||
+        !isclose(int_exp_trapezoid(f2, 4e-4, 0, 2), 8./3, 1e-3, 0) ||
+        !isclose(int_exp_trapezoid(f2, 4e-4, 0, 2), 8./3, 1e-3, 0) ||
+        !isclose(int_exp_trapezoid(f3, 6e-5, 1e-9, 1), -1, 1e-3, 0) ||
+        !isclose(int_exp_trapezoid(f3, 6e-5, 1e-9, 1), -1, 1e-3, 0) ||
+        !isclose(int_exp_trapezoid(f4, 5e-4, 0, 1), 1.4427, 1e-3, 0) ||
+        !isclose(int_exp_trapezoid(f4, 5e-4, 0, 1), 1.4427, 1e-3, 0) ||
+    0)
+        return 1;
+
+    y = vec(a, 1, 1, 1, 1);
+    dx = 1;
+    if (!isclose(int_imp_trapezoid(y, dx), vec_len(y)-1, 1e-9, 0))
+        return 1;
+    n = 100001;
+    dx = 4.0 / n;
+    y = vec_linspace(0, 4, n, a);
+    if (!isclose(int_imp_trapezoid(y, dx), 8, 1e-3, 0))
         return 1;
 }

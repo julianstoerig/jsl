@@ -37,7 +37,7 @@ but do not be annoyed if I fully rewrite it myself.
         - [ ] Integration
             - [x] Riemann, left
             - [x] Riemann, right
-            - [ ] Trapezoid
+            - [x] Trapezoid
             - [ ] Simpson's
         - [ ] Differentiation
             - [ ] Forward Difference
