@@ -23,6 +23,8 @@ F64 *mat_at(Mat m, S64 i, S64 j);
 #define at1(v, i) *vec_at((v), (i))
 F64 *vec_at(Mat m, S64 i);
 
+Mat vec_linspace(F64 xmin, F64 xmax, S64 n, Arena *ap);
+
 typedef struct NumResult NumResult;
 struct NumResult {
     F64 v;
@@ -80,6 +82,10 @@ Mat mat_uniform(S64 rows, S64 cols, F64 x, Arena *ap);
 #define mat_fprint1(f, self)        mat__fprint((f), (self), 2)
 #define mat_fprint2(f, self, prec)  mat__fprint((f), (self), (prec))
 void mat__fprint(FILE *f, Mat self, S32 precision);
+
+#define mat_reshape_ip(m, rows, cols) mat__reshape_ip(&(m), (rows), (cols))
+void mat__reshape_ip(Mat *m, S64 rows, S64 cols);
+Mat mat_reshape(Mat m, S64 rows, S64 cols, Arena *ap);
 
 void mat_add_ip(Mat lhs, Mat rhs);
 Mat mat_add(Mat lhs, Mat rhs, Arena *ap);

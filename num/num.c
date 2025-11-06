@@ -78,6 +78,15 @@ Mat vec_from_col(Mat m, S64 j, Arena *ap) {
     return self;
 }
 
+Mat vec_linspace(F64 xmin, F64 xmax, S64 n, Arena *ap) {
+    Mat v = vec_row_empty(n, ap);
+    F64 dx = (xmax - xmin) / n;
+    for (S64 i=0; i<n; i+=1) {
+        at1(v, i) = xmin + i * dx;
+    }
+    return v;
+}
+
 Mat mat_dup(Mat m, Arena *ap) {
     Mat mat = mat_empty(m.rows, m.cols, ap);
     S64 len_bytes = mat.rows*mat.cols*sizeof(*mat.v);
@@ -161,6 +170,19 @@ void mat__fprint(FILE *f, Mat self, S32 precision) {
         fprintf(f, " ]");
     }
     fprintf(f, "]\n");
+}
+
+void mat__reshape_ip(Mat *m, S64 rows, S64 cols) {
+    S64 new_count = rows*cols;
+    if (mat_count(*m) != new_count) assert(0), abort();
+    m->rows = rows;
+    m->cols = cols;
+}
+
+Mat mat_reshape(Mat m, S64 rows, S64 cols, Arena *ap) {
+    Mat res = mat_dup(m, ap);
+    mat_reshape_ip(res, rows, cols);
+    return res;
 }
 
 void mat_add_ip(Mat lhs, Mat rhs) {
