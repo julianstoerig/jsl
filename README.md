@@ -28,11 +28,20 @@ but do not be annoyed if I fully rewrite it myself.
 - [ ] Unicode (UTF-8) Aware Strings
 - [ ] Numerics
     - [ ] Scalar
-        - [x] Newton
-        - [x] Bisection
-        - [x] Secant
-        - [x] Secant-Bisection
-        - [x] Fixpoint
+        - [ ] Root-Finding 
+            - [x] Newton
+            - [x] Bisection
+            - [x] Secant
+            - [x] Secant-Bisection
+            - [x] Fixpoint
+        - [ ] Integration
+            - [ ] Riemann, left
+            - [ ] Riemann, right
+            - [ ] Trapezoid
+            - [ ] Simpson's
+        - [ ] Differentiation
+            - [ ] Forward Difference
+            - [ ] Central Difference
     - [ ] Linear Algebra
         - [x] Vector
         - [x] Matrix
