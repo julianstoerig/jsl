@@ -35,8 +35,8 @@ but do not be annoyed if I fully rewrite it myself.
             - [x] Secant-Bisection
             - [x] Fixpoint
         - [ ] Integration
-            - [ ] Riemann, left
-            - [ ] Riemann, right
+            - [x] Riemann, left
+            - [x] Riemann, right
             - [ ] Trapezoid
             - [ ] Simpson's
         - [ ] Differentiation
