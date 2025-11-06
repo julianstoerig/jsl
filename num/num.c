@@ -549,6 +549,51 @@ NumResult secant_bisect(F64 f(F64), F64 x0, F64 x1, F64 xtol, S64 max_iterations
     return res;
 }
 
+F64 int_exp_riemann_l(F64 f(F64), F64 dx, F64 xmin, F64 xmax) {
+    F64 res = 0;
+    xmax -= dx; // left riemann sum means xmax is considered at x=xmax-dx
+    for (F64 x=xmin; x<xmax; x+=dx) {
+        res += f(x) * dx;
+    }
+    return res;
+}
+
+F64 int_exp_riemann_r(F64 f(F64), F64 dx, F64 xmin, F64 xmax) {
+    F64 res = 0;
+    xmin += dx; // right riemann sum means xmin is considered at x=xmin+dx
+    for (F64 x=xmin; x<xmax; x+=dx) {
+        res += f(x) * dx;
+    }
+    return res;
+}
+
+F64 int_imp_riemann_l(Mat y, F64 dx) {
+    F64 res = 0;
+    S64 y_len = mat_count(y);
+    for (S64 i=0; i<y_len-1; i+=1) {
+            res += at1(y, i) * dx;
+    }
+    return res;
+}
+
+F64 int_exp_trapezoid(F64 f(F64), F64 dx, F64 xmin, F64 xmax) {
+    F64 res = 0;
+    for (F64 x=xmin; x<xmax-dx; x+=dx) {
+        res += (f(x)+f(x+dx))/2 * dx;
+    }
+    return res;
+}
+
+F64 int_imp_trapezoid(Mat y, F64 dx) {
+    F64 res = 0;
+    S64 y_len = mat_count(y);
+    for (S64 i=0; i<y_len-1; i+=1) {
+        res += (at1(y, i) + at1(y, i+1)) / 2 * dx;
+    }
+    return res;
+}
+
+
 void write_f64v_to_file(FILE *f, F64 *x, F64 *y, S64 n) {
     for (S64 i=0; i<n; i+=1) {
         fprintf(f, "%f %f\n", x[i], y[i]);

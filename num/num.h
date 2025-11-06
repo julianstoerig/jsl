@@ -140,6 +140,16 @@ NumResult newton(F64 f(F64), F64 df(F64), F64 x0, F64 xtol, S64 max_iterations);
 
 NumResult fixpoint(F64 f(F64), F64 x0, F64 xtol, S64 max_iterations);
 
+F64 int_exp_riemann_l(F64 f(F64), F64 dx, F64 xmin, F64 xmax);
+
+F64 int_exp_riemann_r(F64 f(F64), F64 dx, F64 xmin, F64 xmax);
+
+F64 int_imp_riemann_l(Mat y, F64 dx);
+
+F64 int_exp_trapezoid(F64 f(F64), F64 dx, F64 xmin, F64 xmax);
+
+F64 int_imp_trapezoid(Mat y, F64 dx);
+
 void eval_f_on_range(F64 f(F64), F64 **x, F64 **y, F64 xmin, F64 xmax, S64 n, Arena *ap);
 
 void write_f64v_to_file(FILE *f, F64 *x, F64 *y, S64 n);

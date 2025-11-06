@@ -1,63 +1,5 @@
 #include "num.h"
 
-/*
-
-F64 int_exp_riemann_l(F64 f(F64), F64 dx, F64 xmin, F64 xmax) {
-    F64 res = 0;
-    F64 x = xmin;
-    for (S64 i=0; x<xmax; i+=1) {
-        x = xmin + i*dx;
-        res += f(x) * dx;
-    }
-    return res;
-}
-
- * */
-
-F64 int_exp_riemann_l(F64 f(F64), F64 dx, F64 xmin, F64 xmax) {
-    F64 res = 0;
-    xmax -= dx; // left riemann sum means xmax is considered at x=xmax-dx
-    for (F64 x=xmin; x<xmax; x+=dx) {
-        res += f(x) * dx;
-    }
-    return res;
-}
-
-F64 int_exp_riemann_r(F64 f(F64), F64 dx, F64 xmin, F64 xmax) {
-    F64 res = 0;
-    xmin += dx; // right riemann sum means xmin is considered at x=xmin+dx
-    for (F64 x=xmin; x<xmax; x+=dx) {
-        res += f(x) * dx;
-    }
-    return res;
-}
-
-F64 int_imp_riemann_l(Mat y, F64 dx) {
-    F64 res = 0;
-    S64 y_len = mat_count(y);
-    for (S64 i=0; i<y_len-1; i+=1) {
-            res += at1(y, i) * dx;
-    }
-    return res;
-}
-
-F64 int_exp_trapezoid(F64 f(F64), F64 dx, F64 xmin, F64 xmax) {
-    F64 res = 0;
-    for (F64 x=xmin; x<xmax-dx; x+=dx) {
-        res += (f(x)+f(x+dx))/2 * dx;
-    }
-    return res;
-}
-
-F64 int_imp_trapezoid(Mat y, F64 dx) {
-    F64 res = 0;
-    S64 y_len = mat_count(y);
-    for (S64 i=0; i<y_len-1; i+=1) {
-        res += (at1(y, i) + at1(y, i+1)) / 2 * dx;
-    }
-    return res;
-}
-
 F64 f0(F64 x) {
     return 1;
 }
@@ -99,7 +41,7 @@ int main(void) {
     F64 dx = 1;
     if (!isclose(int_imp_riemann_l(y, dx), vec_len(y)-1, 1e-9, 0))
         return 1;
-    S64 n = 100001;
+    S64 n = 30001;
     dx = 4.0 / n;
     y = vec_linspace(0, 4, n, a);
     if (!isclose(int_imp_riemann_l(y, dx), 8, 1e-3, 0))
@@ -125,7 +67,7 @@ int main(void) {
     dx = 1;
     if (!isclose(int_imp_trapezoid(y, dx), vec_len(y)-1, 1e-9, 0))
         return 1;
-    n = 100001;
+    n = 20001;
     dx = 4.0 / n;
     y = vec_linspace(0, 4, n, a);
     if (!isclose(int_imp_trapezoid(y, dx), 8, 1e-3, 0))
